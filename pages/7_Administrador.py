@@ -52,6 +52,7 @@ ROTULOS_SETORES = {
 ROTULOS_DESTINOS = {
     "id_setor": "ID",
     "setor_destino": "Setor de Destino",
+    "secretaria": "Secretaria",
     "ativo": "Ativo"
 }
 
@@ -115,7 +116,7 @@ df_setores = carregar_base(
 
 df_setores_destino = carregar_base(
     CAMINHO_SETORES_DESTINO,
-    ["id_setor", "setor_destino", "ativo"]
+    ["id_setor", "setor_destino", "secretaria", "ativo"]
 )
 
 # =====================================================
@@ -213,16 +214,34 @@ with aba_destinos:
 
     st.divider()
     st.markdown("### ➕ Cadastrar setor de destino")
-    novo_destino = st.text_input("Nome do setor de destino", key="cad_destino")
-    if st.button("Cadastrar setor de destino", key="btn_cad_destino"):
-        if novo_destino.lower() in df_setores_destino["setor_destino"].str.lower().values:
-            st.error("Destino já existe.")
-        else:
-            novo_id = df_setores_destino["id_setor"].max() + 1 if not df_setores_destino.empty else 1
-            df_setores_destino.loc[len(df_setores_destino)] = [novo_id, novo_destino, 1]
-            salvar_csv_github(df_setores_destino, CAMINHO_SETORES_DESTINO, f"Cadastro destino {novo_destino} via Streamlit")
-            st.session_state.msg_sucesso = "Setor de destino cadastrado."
-            st.rerun()
+
+col1, col2 = st.columns(2)
+with col1:
+    novo_destino = st.text_input("Nome do setor de destino *", key="cad_destino")
+with col2:
+    secretaria = st.text_input("Secretaria *", key="cad_secretaria")
+
+if st.button("Cadastrar setor de destino", key="btn_cad_destino"):
+    if not novo_destino.strip() or not secretaria.strip():
+        st.error("Preencha o setor de destino e a secretaria.")
+    elif novo_destino.lower() in df_setores_destino["setor_destino"].str.lower().values:
+        st.error("Destino já existe.")
+    else:
+        novo_id = df_setores_destino["id_setor"].max() + 1 if not df_setores_destino.empty else 1
+        df_setores_destino.loc[len(df_setores_destino)] = [
+            novo_id,
+            novo_destino,
+            secretaria,
+            1
+        ]
+        salvar_csv_github(
+            df_setores_destino,
+            CAMINHO_SETORES_DESTINO,
+            f"Cadastro destino {novo_destino} via Streamlit"
+        )
+        st.session_state.msg_sucesso = "Setor de destino cadastrado com sucesso."
+        st.rerun()
+
 
     st.divider()
     st.markdown("### ✏️ Ativar / Desativar destino")
@@ -242,3 +261,4 @@ with aba_destinos:
         salvar_csv_github(df_setores_destino, CAMINHO_SETORES_DESTINO, f"Exclusão destino {destino_exc} via Streamlit")
         st.session_state.msg_sucesso = "Setor de destino excluído."
         st.rerun()
+
