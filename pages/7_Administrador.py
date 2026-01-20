@@ -1,10 +1,16 @@
 import streamlit as st
 import pandas as pd
 import os
+from github import Github
 
+# =====================================================
+# CONFIGURAÇÃO DA PÁGINA
+# =====================================================
 st.set_page_config(page_title="Administrador", layout="wide")
 
-# ================= BLOQUEIO =================
+# =====================================================
+# BLOQUEIO DE ACESSO
+# =====================================================
 if "logado" not in st.session_state or not st.session_state.logado:
     st.warning("Acesso restrito. Faça login.")
     st.stop()
@@ -15,7 +21,9 @@ if st.session_state.perfil != "Administrador":
 
 st.title("⚙️ Administração do Sistema")
 
-# ================= MENSAGENS =================
+# =====================================================
+# MENSAGENS DE SUCESSO
+# =====================================================
 if "msg_sucesso" not in st.session_state:
     st.session_state.msg_sucesso = None
 
@@ -24,7 +32,9 @@ def mostrar_sucesso():
         st.success(st.session_state.msg_sucesso)
         st.session_state.msg_sucesso = None
 
-# ================= RÓTULOS =================
+# =====================================================
+# ROTULOS VISUAIS
+# =====================================================
 ROTULOS_USUARIOS = {
     "usuario": "Usuário",
     "nome_completo": "Servidor",
@@ -42,23 +52,57 @@ ROTULOS_SETORES = {
 ROTULOS_DESTINOS = {
     "id_setor": "ID",
     "setor_destino": "Setor de Destino",
-    "secretaria": "Secretaria",
     "ativo": "Ativo"
 }
 
-# ================= CAMINHOS =================
+# =====================================================
+# GITHUB CONFIG
+# =====================================================
+GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]  # Coloque seu token no Streamlit secrets
+REPO_NAME = st.secrets["REPO_NAME"]        # ex: "usuario/repositorio"
+BRANCH = "main"
+
+g = Github(GITHUB_TOKEN)
+repo = g.get_repo(REPO_NAME)
+
+def salvar_csv_github(df, caminho_github, mensagem_commit):
+    csv_bytes = df.to_csv(index=False).encode("utf-8")
+    try:
+        arquivo = repo.get_contents(caminho_github, ref=BRANCH)
+        repo.update_file(
+            path=arquivo.path,
+            message=mensagem_commit,
+            content=csv_bytes,
+            sha=arquivo.sha,
+            branch=BRANCH
+        )
+    except:
+        repo.create_file(
+            path=caminho_github,
+            message=mensagem_commit,
+            content=csv_bytes,
+            branch=BRANCH
+        )
+
+# =====================================================
+# CAMINHOS LOCAIS / GITHUB
+# =====================================================
 CAMINHO_USUARIOS = "data/usuarios.csv"
 CAMINHO_SETORES = "data/setores.csv"
 CAMINHO_SETORES_DESTINO = "data/setores_destinos.csv"
 
-# ================= FUNÇÃO BASE =================
+# =====================================================
+# FUNÇÃO BASE
+# =====================================================
 def carregar_base(caminho, colunas):
     if not os.path.exists(caminho):
         df = pd.DataFrame(columns=colunas)
         df.to_csv(caminho, index=False)
     return pd.read_csv(caminho)
 
-# ================= BASES =================
+# =====================================================
+# BASES
+# =====================================================
 df_users = carregar_base(
     CAMINHO_USUARIOS,
     ["usuario", "nome_completo", "senha", "perfil", "setor"]
@@ -71,17 +115,19 @@ df_setores = carregar_base(
 
 df_setores_destino = carregar_base(
     CAMINHO_SETORES_DESTINO,
-    ["id_setor", "setor_destino", "secretaria", "ativo"]
+    ["id_setor", "setor_destino", "ativo"]
 )
 
-# ================= ABAS =================
+# =====================================================
+# ABAS
+# =====================================================
 aba_usuarios, aba_setores, aba_destinos = st.tabs(
     ["👤 Usuários", "🏢 Setores Internos", "📦 Setores de Destino"]
 )
 
-# ======================================================
-# ================= ABA USUÁRIOS =======================
-# ======================================================
+# =====================================================
+# ABA USUÁRIOS
+# =====================================================
 with aba_usuarios:
     st.subheader("👤 Gestão de Usuários")
     mostrar_sucesso()
@@ -92,66 +138,40 @@ with aba_usuarios:
     st.markdown("### ➕ Cadastrar usuário")
 
     col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        usuario = st.text_input("Usuário", key="cad_usuario")
-    with col2:
-        nome = st.text_input("Servidor", key="cad_nome")
-    with col3:
-        senha = st.text_input("Senha", type="password", key="cad_senha")
-    with col4:
-        perfil = st.selectbox(
-            "Perfil",
-            ["Servidor", "Chefia", "Secretario", "Administrador"],
-            key="cad_perfil"
-        )
-    with col5:
-        setor = st.selectbox(
-            "Setor",
-            df_setores[df_setores["ativo"] == 1]["setor"].tolist(),
-            key="cad_usuario_setor"
-        )
+    with col1: usuario = st.text_input("Usuário", key="cad_usuario")
+    with col2: nome = st.text_input("Servidor", key="cad_nome")
+    with col3: senha = st.text_input("Senha", type="password", key="cad_senha")
+    with col4: perfil = st.selectbox("Perfil", ["Servidor", "Chefia", "Secretario", "Administrador"], key="cad_perfil")
+    with col5: setor = st.selectbox("Setor", df_setores[df_setores["ativo"] == 1]["setor"].tolist(), key="cad_setor")
 
     if st.button("Cadastrar usuário", key="btn_cad_usuario"):
         if usuario in df_users["usuario"].values:
             st.error("Usuário já existe.")
         else:
             df_users.loc[len(df_users)] = [usuario, nome, senha, perfil, setor]
-            df_users.to_csv(CAMINHO_USUARIOS, index=False)
+            salvar_csv_github(df_users, CAMINHO_USUARIOS, f"Cadastro usuário {usuario} via Streamlit")
             st.session_state.msg_sucesso = "Usuário cadastrado com sucesso."
             st.rerun()
 
     st.divider()
     st.markdown("### 🗑️ Excluir usuário")
-
-    usuario_exc = st.selectbox(
-        "Usuário",
-        df_users["usuario"],
-        key="exc_usuario"
-    )
-
+    usuario_exc = st.selectbox("Usuário", df_users["usuario"], key="exc_usuario")
     if st.button("Excluir usuário", key="btn_exc_usuario"):
         df_users = df_users[df_users["usuario"] != usuario_exc]
-        df_users.to_csv(CAMINHO_USUARIOS, index=False)
+        salvar_csv_github(df_users, CAMINHO_USUARIOS, f"Exclusão usuário {usuario_exc} via Streamlit")
         st.session_state.msg_sucesso = "Usuário excluído com sucesso."
         st.rerun()
 
-# ======================================================
-# ================= ABA SETORES INTERNOS ================
-# ======================================================
+# =====================================================
+# ABA SETORES INTERNOS
+# =====================================================
 with aba_setores:
     st.subheader("🏢 Gestão de Setores Internos")
     mostrar_sucesso()
-
-    st.dataframe(
-        df_setores.rename(columns=ROTULOS_SETORES)
-        .drop(columns=["ID"], errors="ignore")
-        .sort_values("Setor Interno"),
-        use_container_width=True
-    )
+    st.dataframe(df_setores.rename(columns=ROTULOS_SETORES).drop(columns=["ID"], errors="ignore").sort_values("Setor Interno"), use_container_width=True)
 
     st.divider()
     st.markdown("### ➕ Cadastrar setor interno")
-
     novo_setor = st.text_input("Nome do setor interno", key="cad_setor_interno")
 
     if st.button("Cadastrar setor interno", key="btn_cad_setor"):
@@ -160,121 +180,65 @@ with aba_setores:
         else:
             novo_id = df_setores["id_setor"].max() + 1 if not df_setores.empty else 1
             df_setores.loc[len(df_setores)] = [novo_id, novo_setor, 1]
-            df_setores.to_csv(CAMINHO_SETORES, index=False)
+            salvar_csv_github(df_setores, CAMINHO_SETORES, f"Cadastro setor interno {novo_setor} via Streamlit")
             st.session_state.msg_sucesso = "Setor interno cadastrado."
             st.rerun()
 
     st.divider()
     st.markdown("### ✏️ Ativar / Desativar setor")
-
-    setor_sel = st.selectbox(
-        "Setor",
-        df_setores["setor"],
-        key="alt_setor_interno"
-    )
-
-    novo_status = st.selectbox(
-        "Nova situação",
-        ["Ativo", "Inativo"],
-        key="alt_status_setor"
-    )
-
+    setor_sel = st.selectbox("Setor", df_setores["setor"], key="alt_setor")
+    novo_status = st.selectbox("Nova situação", ["Ativo", "Inativo"], key="alt_status_setor")
     if st.button("Atualizar setor", key="btn_alt_setor"):
-        df_setores.loc[df_setores["setor"] == setor_sel, "ativo"] = (
-            1 if novo_status == "Ativo" else 0
-        )
-        df_setores.to_csv(CAMINHO_SETORES, index=False)
+        df_setores.loc[df_setores["setor"] == setor_sel, "ativo"] = 1 if novo_status == "Ativo" else 0
+        salvar_csv_github(df_setores, CAMINHO_SETORES, f"Atualização setor {setor_sel} via Streamlit")
         st.session_state.msg_sucesso = "Situação do setor atualizada."
         st.rerun()
 
     st.divider()
     st.markdown("### 🗑️ Excluir setor interno")
-
-    setor_exc = st.selectbox(
-        "Setor para excluir",
-        df_setores["setor"],
-        key="exc_setor_interno"
-    )
-
+    setor_exc = st.selectbox("Setor para excluir", df_setores["setor"], key="exc_setor")
     if st.button("Excluir setor interno", key="btn_exc_setor"):
         df_setores = df_setores[df_setores["setor"] != setor_exc]
-        df_setores.to_csv(CAMINHO_SETORES, index=False)
+        salvar_csv_github(df_setores, CAMINHO_SETORES, f"Exclusão setor {setor_exc} via Streamlit")
         st.session_state.msg_sucesso = "Setor interno excluído."
         st.rerun()
 
-# ======================================================
-# ================= ABA SETORES DESTINO =================
-# ======================================================
+# =====================================================
+# ABA SETORES DESTINO
+# =====================================================
 with aba_destinos:
     st.subheader("📦 Gestão de Setores de Destino")
     mostrar_sucesso()
-
-    st.dataframe(
-        df_setores_destino.rename(columns=ROTULOS_DESTINOS)
-        .drop(columns=["ID"], errors="ignore")
-        .sort_values("Setor de Destino"),
-        use_container_width=True
-    )
+    st.dataframe(df_setores_destino.rename(columns=ROTULOS_DESTINOS).drop(columns=["ID"], errors="ignore").sort_values("Setor de Destino"), use_container_width=True)
 
     st.divider()
     st.markdown("### ➕ Cadastrar setor de destino")
-
-    col1, col2 = st.columns(2)
-    with col1:
-        novo_destino = st.text_input("Setor de destino *", key="cad_destino")
-    with col2:
-        secretaria = st.text_input("Secretaria *", key="cad_secretaria")
-
+    novo_destino = st.text_input("Nome do setor de destino", key="cad_destino")
     if st.button("Cadastrar setor de destino", key="btn_cad_destino"):
-        if not novo_destino.strip() or not secretaria.strip():
-            st.error("Preencha setor de destino e secretaria.")
-        elif novo_destino.lower() in df_setores_destino["setor_destino"].str.lower().values:
+        if novo_destino.lower() in df_setores_destino["setor_destino"].str.lower().values:
             st.error("Destino já existe.")
         else:
             novo_id = df_setores_destino["id_setor"].max() + 1 if not df_setores_destino.empty else 1
-            df_setores_destino.loc[len(df_setores_destino)] = [
-                novo_id, novo_destino, secretaria, 1
-            ]
-            df_setores_destino.to_csv(CAMINHO_SETORES_DESTINO, index=False)
+            df_setores_destino.loc[len(df_setores_destino)] = [novo_id, novo_destino, 1]
+            salvar_csv_github(df_setores_destino, CAMINHO_SETORES_DESTINO, f"Cadastro destino {novo_destino} via Streamlit")
             st.session_state.msg_sucesso = "Setor de destino cadastrado."
             st.rerun()
 
     st.divider()
     st.markdown("### ✏️ Ativar / Desativar destino")
-
-    destino_sel = st.selectbox(
-        "Destino",
-        df_setores_destino["setor_destino"],
-        key="alt_destino"
-    )
-
-    novo_status_dest = st.selectbox(
-        "Nova situação",
-        ["Ativo", "Inativo"],
-        key="alt_status_destino"
-    )
-
+    destino_sel = st.selectbox("Setor de destino", df_setores_destino["setor_destino"], key="alt_destino")
+    novo_status_dest = st.selectbox("Nova situação", ["Ativo", "Inativo"], key="alt_status_destino")
     if st.button("Atualizar destino", key="btn_alt_destino"):
-        df_setores_destino.loc[
-            df_setores_destino["setor_destino"] == destino_sel, "ativo"
-        ] = 1 if novo_status_dest == "Ativo" else 0
-        df_setores_destino.to_csv(CAMINHO_SETORES_DESTINO, index=False)
+        df_setores_destino.loc[df_setores_destino["setor_destino"] == destino_sel, "ativo"] = 1 if novo_status_dest == "Ativo" else 0
+        salvar_csv_github(df_setores_destino, CAMINHO_SETORES_DESTINO, f"Atualização destino {destino_sel} via Streamlit")
         st.session_state.msg_sucesso = "Situação do destino atualizada."
         st.rerun()
 
     st.divider()
     st.markdown("### 🗑️ Excluir setor de destino")
-
-    destino_exc = st.selectbox(
-        "Destino para excluir",
-        df_setores_destino["setor_destino"],
-        key="exc_destino"
-    )
-
+    destino_exc = st.selectbox("Destino para excluir", df_setores_destino["setor_destino"], key="exc_destino")
     if st.button("Excluir setor de destino", key="btn_exc_destino"):
-        df_setores_destino = df_setores_destino[
-            df_setores_destino["setor_destino"] != destino_exc
-        ]
-        df_setores_destino.to_csv(CAMINHO_SETORES_DESTINO, index=False)
+        df_setores_destino = df_setores_destino[df_setores_destino["setor_destino"] != destino_exc]
+        salvar_csv_github(df_setores_destino, CAMINHO_SETORES_DESTINO, f"Exclusão destino {destino_exc} via Streamlit")
         st.session_state.msg_sucesso = "Setor de destino excluído."
         st.rerun()
