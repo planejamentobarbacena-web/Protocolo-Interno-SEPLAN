@@ -210,55 +210,94 @@ with aba_setores:
 with aba_destinos:
     st.subheader("📦 Gestão de Setores de Destino")
     mostrar_sucesso()
-    st.dataframe(df_setores_destino.rename(columns=ROTULOS_DESTINOS).drop(columns=["ID"], errors="ignore").sort_values("Setor de Destino"), use_container_width=True)
+
+    st.dataframe(
+        df_setores_destino
+        .rename(columns=ROTULOS_DESTINOS)
+        .drop(columns=["ID"], errors="ignore")
+        .sort_values("Setor de Destino"),
+        use_container_width=True
+    )
 
     st.divider()
     st.markdown("### ➕ Cadastrar setor de destino")
 
-col1, col2 = st.columns(2)
-with col1:
-    novo_destino = st.text_input("Nome do setor de destino *", key="cad_destino")
-with col2:
-    secretaria = st.text_input("Secretaria *", key="cad_secretaria")
+    col1, col2 = st.columns(2)
+    with col1:
+        novo_destino = st.text_input("Nome do setor de destino *", key="cad_destino")
+    with col2:
+        secretaria = st.text_input("Secretaria *", key="cad_secretaria")
 
-if st.button("Cadastrar setor de destino", key="btn_cad_destino"):
-    if not novo_destino.strip() or not secretaria.strip():
-        st.error("Preencha o setor de destino e a secretaria.")
-    elif novo_destino.lower() in df_setores_destino["setor_destino"].str.lower().values:
-        st.error("Destino já existe.")
-    else:
-        novo_id = df_setores_destino["id_setor"].max() + 1 if not df_setores_destino.empty else 1
-        df_setores_destino.loc[len(df_setores_destino)] = [
-            novo_id,
-            novo_destino,
-            secretaria,
-            1
-        ]
-        salvar_csv_github(
-            df_setores_destino,
-            CAMINHO_SETORES_DESTINO,
-            f"Cadastro destino {novo_destino} via Streamlit"
-        )
-        st.session_state.msg_sucesso = "Setor de destino cadastrado com sucesso."
-        st.rerun()
-
+    if st.button("Cadastrar setor de destino", key="btn_cad_destino"):
+        if not novo_destino.strip() or not secretaria.strip():
+            st.error("Preencha o setor de destino e a secretaria.")
+        elif novo_destino.lower() in df_setores_destino["setor_destino"].str.lower().values:
+            st.error("Destino já existe.")
+        else:
+            novo_id = df_setores_destino["id_setor"].max() + 1 if not df_setores_destino.empty else 1
+            df_setores_destino.loc[len(df_setores_destino)] = [
+                novo_id,
+                novo_destino,
+                secretaria,
+                1
+            ]
+            salvar_csv_github(
+                df_setores_destino,
+                CAMINHO_SETORES_DESTINO,
+                f"Cadastro destino {novo_destino} via Streamlit"
+            )
+            st.session_state.msg_sucesso = "Setor de destino cadastrado com sucesso."
+            st.rerun()
 
     st.divider()
     st.markdown("### ✏️ Ativar / Desativar destino")
-    destino_sel = st.selectbox("Setor de destino", df_setores_destino["setor_destino"], key="alt_destino")
-    novo_status_dest = st.selectbox("Nova situação", ["Ativo", "Inativo"], key="alt_status_destino")
+
+    destino_sel = st.selectbox(
+        "Setor de destino",
+        df_setores_destino["setor_destino"],
+        key="alt_destino"
+    )
+
+    novo_status_dest = st.selectbox(
+        "Nova situação",
+        ["Ativo", "Inativo"],
+        key="alt_status_destino"
+    )
+
     if st.button("Atualizar destino", key="btn_alt_destino"):
-        df_setores_destino.loc[df_setores_destino["setor_destino"] == destino_sel, "ativo"] = 1 if novo_status_dest == "Ativo" else 0
-        salvar_csv_github(df_setores_destino, CAMINHO_SETORES_DESTINO, f"Atualização destino {destino_sel} via Streamlit")
+        df_setores_destino.loc[
+            df_setores_destino["setor_destino"] == destino_sel, "ativo"
+        ] = 1 if novo_status_dest == "Ativo" else 0
+
+        salvar_csv_github(
+            df_setores_destino,
+            CAMINHO_SETORES_DESTINO,
+            f"Atualização destino {destino_sel} via Streamlit"
+        )
         st.session_state.msg_sucesso = "Situação do destino atualizada."
         st.rerun()
 
     st.divider()
     st.markdown("### 🗑️ Excluir setor de destino")
-    destino_exc = st.selectbox("Destino para excluir", df_setores_destino["setor_destino"], key="exc_destino")
+
+    destino_exc = st.selectbox(
+        "Destino para excluir",
+        df_setores_destino["setor_destino"],
+        key="exc_destino"
+    )
+
     if st.button("Excluir setor de destino", key="btn_exc_destino"):
-        df_setores_destino = df_setores_destino[df_setores_destino["setor_destino"] != destino_exc]
-        salvar_csv_github(df_setores_destino, CAMINHO_SETORES_DESTINO, f"Exclusão destino {destino_exc} via Streamlit")
+        df_setores_destino = df_setores_destino[
+            df_setores_destino["setor_destino"] != destino_exc
+        ]
+
+        salvar_csv_github(
+            df_setores_destino,
+            CAMINHO_SETORES_DESTINO,
+            f"Exclusão destino {destino_exc} via Streamlit"
+        )
         st.session_state.msg_sucesso = "Setor de destino excluído."
         st.rerun()
+
+
 
