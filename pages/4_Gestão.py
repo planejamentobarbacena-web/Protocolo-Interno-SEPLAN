@@ -27,7 +27,7 @@ st.title("📊 Gestão de Servidores")
 # =====================================================
 # CARREGAMENTO DAS BASES
 # =====================================================
-df_proc = pd.read_csv("data/Processos.csv")
+df_proc = pd.read_csv("data/processos.csv")
 df_and = pd.read_csv("data/andamentos.csv")
 
 df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce")
@@ -149,3 +149,4 @@ if st.button("📄 Gerar PDF"):
             file_name=nome_pdf,
             mime="application/pdf"
         )
+
