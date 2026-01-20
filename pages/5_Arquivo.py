@@ -136,6 +136,7 @@ else:
         format_func=lambda x: df_remessa.loc[
             df_remessa["id_processo"] == x, "label"
         ].values[0]
+        placeholder="Selecione um ou mais processos..."
     )
 
     if ids_sel:
@@ -276,4 +277,5 @@ else:
         df_proc.to_csv(CAMINHO_PROC, index=False)
 
         st.success("✅ Processo desarquivado com sucesso e liberado para tramitação.")
+
 
