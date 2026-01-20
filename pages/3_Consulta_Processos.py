@@ -19,7 +19,7 @@ st.title("🔍 Consulta de Protocolos e Andamentos")
 # =====================================================
 # 📂 BASES
 # =====================================================
-df_proc = pd.read_csv("data/Processos.csv")
+df_proc = pd.read_csv("data/processos.csv")
 df_and = pd.read_csv("data/andamentos.csv")
 
 CAMINHO_DESTINACOES = "data/destinacoes.csv"
@@ -171,3 +171,4 @@ if st.button("Gerar PDF"):
             file_name=nome,
             mime="application/pdf"
         )
+
