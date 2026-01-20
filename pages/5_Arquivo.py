@@ -18,7 +18,7 @@ st.set_page_config(
 # =====================================================
 # CAMINHOS DOS ARQUIVOS
 # =====================================================
-CAMINHO_PROC = "data/Processos.csv"
+CAMINHO_PROC = "data/processos.csv"
 CAMINHO_DESTINACOES = "data/destinacoes.csv"
 CAMINHO_SETOR_DESTINO = "data/setores_destinos.csv"
 
@@ -276,3 +276,4 @@ else:
         df_proc.to_csv(CAMINHO_PROC, index=False)
 
         st.success("✅ Processo desarquivado com sucesso e liberado para tramitação.")
+
