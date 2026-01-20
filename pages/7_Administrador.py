@@ -219,10 +219,21 @@ with aba_destinos:
             st.error("Destino já existe.")
         else:
             novo_id = df_setores_destino["id_setor"].max() + 1 if not df_setores_destino.empty else 1
-            df_setores_destino.loc[len(df_setores_destino)] = [novo_id, novo_destino, 1]
-            salvar_csv_github(df_setores_destino, CAMINHO_SETORES_DESTINO, f"Cadastro destino {novo_destino} via Streamlit")
-            st.session_state.msg_sucesso = "Setor de destino cadastrado."
-            st.rerun()
+
+# Criar nova linha com todas as colunas
+nova_linha = pd.DataFrame(
+    [[novo_id, novo_destino, "", 1]],  # "" para secretaria, 1 para ativo
+    columns=df_setores_destino.columns
+)
+
+# Adicionar ao DataFrame
+df_setores_destino = pd.concat([df_setores_destino, nova_linha], ignore_index=True)
+
+# Salvar no GitHub
+salvar_csv_github(df_setores_destino, CAMINHO_SETORES_DESTINO, f"Cadastro destino {novo_destino} via Streamlit")
+st.session_state.msg_sucesso = "Setor de destino cadastrado."
+st.rerun()
+
 
     st.divider()
     st.markdown("### ✏️ Ativar / Desativar destino")
@@ -242,3 +253,4 @@ with aba_destinos:
         salvar_csv_github(df_setores_destino, CAMINHO_SETORES_DESTINO, f"Exclusão destino {destino_exc} via Streamlit")
         st.session_state.msg_sucesso = "Setor de destino excluído."
         st.rerun()
+
