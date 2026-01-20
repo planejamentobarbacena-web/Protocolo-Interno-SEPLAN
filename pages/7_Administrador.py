@@ -4,209 +4,150 @@ import os
 from github import Github
 
 # =====================================================
-# CONFIGURAÇÃO DA PÁGINA
+# CONFIGURAÇÃO
 # =====================================================
 st.set_page_config(page_title="Administrador", layout="wide")
 
 # =====================================================
-# BLOQUEIO DE ACESSO
+# SEGURANÇA
 # =====================================================
 if "logado" not in st.session_state or not st.session_state.logado:
-    st.warning("Acesso restrito. Faça login.")
     st.stop()
 
 if st.session_state.perfil != "Administrador":
-    st.error("Acesso permitido apenas ao Administrador.")
+    st.error("Acesso restrito ao Administrador.")
     st.stop()
 
 st.title("⚙️ Administração do Sistema")
 
 # =====================================================
-# MENSAGENS DE SUCESSO
-# =====================================================
-if "msg_sucesso" not in st.session_state:
-    st.session_state.msg_sucesso = None
-
-def mostrar_sucesso():
-    if st.session_state.msg_sucesso:
-        st.success(st.session_state.msg_sucesso)
-        st.session_state.msg_sucesso = None
-
-# =====================================================
-# RÓTULOS VISUAIS
-# =====================================================
-ROTULOS_USUARIOS = {
-    "usuario": "Usuário",
-    "nome_completo": "Servidor",
-    "senha": "Senha",
-    "perfil": "Perfil",
-    "setor": "Setor"
-}
-
-ROTULOS_SETORES = {
-    "id_setor": "ID",
-    "setor": "Setor Interno",
-    "ativo": "Ativo"
-}
-
-ROTULOS_DESTINOS = {
-    "id_setor": "ID",
-    "setor_destino": "Setor de Destino",
-    "secretaria": "Secretaria",
-    "ativo": "Ativo"
-}
-
-# =====================================================
-# GITHUB CONFIG
+# GITHUB
 # =====================================================
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 REPO_NAME = st.secrets["REPO_NAME"]
 BRANCH = "main"
 
-g = Github(GITHUB_TOKEN)
-repo = g.get_repo(REPO_NAME)
+repo = Github(GITHUB_TOKEN).get_repo(REPO_NAME)
 
-def salvar_csv_github(df, caminho, mensagem):
-    csv_bytes = df.to_csv(index=False).encode("utf-8")
+def salvar_csv(df, caminho, msg):
+    csv = df.to_csv(index=False).encode("utf-8")
     try:
-        arquivo = repo.get_contents(caminho, ref=BRANCH)
-        repo.update_file(
-            path=arquivo.path,
-            message=mensagem,
-            content=csv_bytes,
-            sha=arquivo.sha,
-            branch=BRANCH
-        )
+        arq = repo.get_contents(caminho, ref=BRANCH)
+        repo.update_file(arq.path, msg, csv, arq.sha, branch=BRANCH)
     except:
-        repo.create_file(
-            path=caminho,
-            message=mensagem,
-            content=csv_bytes,
-            branch=BRANCH
-        )
+        repo.create_file(caminho, msg, csv, branch=BRANCH)
 
 # =====================================================
 # CAMINHOS
 # =====================================================
-CAMINHO_USUARIOS = "data/usuarios.csv"
-CAMINHO_SETORES = "data/setores.csv"
-CAMINHO_DESTINOS = "data/setores_destinos.csv"
+CAM_USUARIOS = "data/usuarios.csv"
+CAM_SETORES = "data/setores.csv"
+CAM_DESTINOS = "data/setores_destinos.csv"
 
 # =====================================================
-# FUNÇÃO DE CARGA
+# BASE
 # =====================================================
-def carregar_base(caminho, colunas):
+def carregar(caminho, colunas):
     if not os.path.exists(caminho):
-        df = pd.DataFrame(columns=colunas)
-        df.to_csv(caminho, index=False)
+        pd.DataFrame(columns=colunas).to_csv(caminho, index=False)
     return pd.read_csv(caminho)
 
-# =====================================================
-# BASES
-# =====================================================
-df_users = carregar_base(
-    CAMINHO_USUARIOS,
-    ["usuario", "nome_completo", "senha", "perfil", "setor"]
-)
-
-df_setores = carregar_base(
-    CAMINHO_SETORES,
-    ["id_setor", "setor", "ativo"]
-)
-
-df_destinos = carregar_base(
-    CAMINHO_DESTINOS,
-    ["id_setor", "setor_destino", "secretaria", "ativo"]
-)
+df_users = carregar(CAM_USUARIOS, ["usuario","nome_completo","senha","perfil","setor","ativo"])
+df_setores = carregar(CAM_SETORES, ["id_setor","setor","ativo"])
+df_destinos = carregar(CAM_DESTINOS, ["id_setor","setor_destino","secretaria","ativo"])
 
 # =====================================================
 # ABAS
 # =====================================================
-aba_usuarios, aba_setores, aba_destinos = st.tabs(
+aba_users, aba_setores, aba_destinos = st.tabs(
     ["👤 Usuários", "🏢 Setores Internos", "📦 Setores de Destino"]
 )
 
 # =====================================================
-# ABA USUÁRIOS
+# 👤 USUÁRIOS
 # =====================================================
-with aba_usuarios:
-    st.subheader("👤 Gestão de Usuários")
-    mostrar_sucesso()
+with aba_users:
+    st.subheader("Usuários")
 
-    st.dataframe(df_users.rename(columns=ROTULOS_USUARIOS), use_container_width=True)
+    st.dataframe(df_users, use_container_width=True)
 
     st.divider()
-    st.markdown("### ➕ Cadastrar usuário")
+    st.markdown("### Ações")
 
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1: usuario = st.text_input("Usuário")
-    with col2: nome = st.text_input("Servidor")
-    with col3: senha = st.text_input("Senha", type="password")
-    with col4: perfil = st.selectbox("Perfil", ["Servidor", "Chefia", "Secretario", "Administrador"])
-    with col5: setor = st.selectbox("Setor", df_setores[df_setores["ativo"] == 1]["setor"].tolist())
+    usuario_sel = st.selectbox("Usuário", df_users["usuario"])
 
-    if st.button("Cadastrar usuário"):
-        if usuario in df_users["usuario"].values:
-            st.error("Usuário já existe.")
-        else:
-            df_users.loc[len(df_users)] = [usuario, nome, senha, perfil, setor]
-            salvar_csv_github(df_users, CAMINHO_USUARIOS, f"Cadastro usuário {usuario}")
-            st.session_state.msg_sucesso = "Usuário cadastrado com sucesso."
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        if st.button("Ativar / Desativar"):
+            idx = df_users[df_users["usuario"] == usuario_sel].index[0]
+            df_users.at[idx, "ativo"] = 0 if df_users.at[idx, "ativo"] == 1 else 1
+            salvar_csv(df_users, CAM_USUARIOS, "Alteração status usuário")
             st.rerun()
 
+    with col2:
+        if st.button("Excluir usuário"):
+            if st.confirm(f"Excluir usuário {usuario_sel}?"):
+                df_users = df_users[df_users["usuario"] != usuario_sel]
+                salvar_csv(df_users, CAM_USUARIOS, "Exclusão usuário")
+                st.rerun()
+
 # =====================================================
-# ABA SETORES INTERNOS
+# 🏢 SETORES INTERNOS
 # =====================================================
 with aba_setores:
-    st.subheader("🏢 Gestão de Setores Internos")
-    mostrar_sucesso()
+    st.subheader("Setores Internos")
 
-    st.dataframe(
-        df_setores.rename(columns=ROTULOS_SETORES),
-        use_container_width=True
-    )
+    st.dataframe(df_setores, use_container_width=True)
 
     st.divider()
-    novo_setor = st.text_input("Novo setor interno")
+    setor_sel = st.selectbox("Setor", df_setores["setor"])
 
-    if st.button("Cadastrar setor interno"):
-        if novo_setor.lower() in df_setores["setor"].str.lower().values:
-            st.error("Setor já existe.")
-        else:
-            novo_id = df_setores["id_setor"].max() + 1 if not df_setores.empty else 1
-            df_setores.loc[len(df_setores)] = [novo_id, novo_setor, 1]
-            salvar_csv_github(df_setores, CAMINHO_SETORES, f"Cadastro setor {novo_setor}")
-            st.session_state.msg_sucesso = "Setor cadastrado."
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        if st.button("Ativar / Desativar setor"):
+            idx = df_setores[df_setores["setor"] == setor_sel].index[0]
+            df_setores.at[idx, "ativo"] = 0 if df_setores.at[idx, "ativo"] == 1 else 1
+            salvar_csv(df_setores, CAM_SETORES, "Alteração status setor")
             st.rerun()
 
+    with col2:
+        if st.button("Excluir setor"):
+            if st.confirm(f"Excluir setor {setor_sel}?"):
+                df_setores = df_setores[df_setores["setor"] != setor_sel]
+                salvar_csv(df_setores, CAM_SETORES, "Exclusão setor")
+                st.rerun()
+
 # =====================================================
-# ABA SETORES DESTINO
+# 📦 SETORES DESTINO
 # =====================================================
 with aba_destinos:
-    st.subheader("📦 Gestão de Setores de Destino")
-    mostrar_sucesso()
+    st.subheader("Setores de Destino")
 
-    st.dataframe(
-        df_destinos.rename(columns=ROTULOS_DESTINOS)
-        .sort_values(["Secretaria", "Setor de Destino"]),
-        use_container_width=True
-    )
+    st.dataframe(df_destinos, use_container_width=True)
 
     st.divider()
-    st.markdown("### ➕ Cadastrar setor de destino")
+    destino_sel = st.selectbox(
+        "Setor de destino",
+        df_destinos["setor_destino"] + " (" + df_destinos["secretaria"] + ")"
+    )
+
+    idx = df_destinos.index[
+        (df_destinos["setor_destino"] + " (" + df_destinos["secretaria"] + ")") == destino_sel
+    ][0]
 
     col1, col2 = st.columns(2)
-    with col1:
-        novo_destino = st.text_input("Setor de destino *")
-    with col2:
-        secretaria = st.text_input("Secretaria *")
 
-    if st.button("Cadastrar setor de destino"):
-        if not novo_destino or not secretaria:
-            st.error("Todos os campos são obrigatórios.")
-        else:
-            novo_id = df_destinos["id_setor"].max() + 1 if not df_destinos.empty else 1
-            df_destinos.loc[len(df_destinos)] = [novo_id, novo_destino, secretaria, 1]
-            salvar_csv_github(df_destinos, CAMINHO_DESTINOS, f"Cadastro destino {novo_destino}")
-            st.session_state.msg_sucesso = "Setor de destino cadastrado."
+    with col1:
+        if st.button("Ativar / Desativar destino"):
+            df_destinos.at[idx, "ativo"] = 0 if df_destinos.at[idx, "ativo"] == 1 else 1
+            salvar_csv(df_destinos, CAM_DESTINOS, "Alteração status destino")
             st.rerun()
+
+    with col2:
+        if st.button("Excluir destino"):
+            if st.confirm(f"Excluir {destino_sel}?"):
+                df_destinos = df_destinos.drop(idx)
+                salvar_csv(df_destinos, CAM_DESTINOS, "Exclusão destino")
+                st.rerun()
