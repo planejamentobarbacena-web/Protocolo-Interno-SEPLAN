@@ -215,7 +215,7 @@ id_setor,setor_destino,secretaria,ativo
 214,Departamento de Vigilância Sanitária,SESAP,1
 215,Departamento de Vigilânica Epidemiológica,SESAP,1
 216,Divisão  CEREST,SESAP,1
-217,"Divisão (CTA)/(SAE) /(CRIE)",SESAP,1
+217,Divisão (CTA)/(SAE) /(CRIE),SESAP,1
 218,Divisão de Imunização,SESAP,1
 219,Divisão de Zoonoses,SESAP,1
 220,Diretoria de Atenção Primária à Saúde,SESAP,1
@@ -303,3 +303,4 @@ id_setor,setor_destino,secretaria,ativo
 302,Departamento Centro de Controle Operacional (CCO),SSP,1
 303,Corregedoria da Guarda Civil Municipal,SSP,1
 304,Ouvidoria da GCM,SSP,1
+305,teste02,,1
