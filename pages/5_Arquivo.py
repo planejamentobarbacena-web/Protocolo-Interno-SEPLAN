@@ -131,12 +131,12 @@ else:
     )
 
     ids_sel = st.multiselect(
-        "Selecione os processos que irão compor a remessa",
-        df_remessa["id_processo"],
-        format_func=lambda x: df_remessa.loc[
-            df_remessa["id_processo"] == x, "label"
-        ].values[0]
-       )
+    "Selecione os processos que irão compor a remessa",
+    df_remessa["id_processo"].tolist(),
+    format_func=lambda x: df_remessa.loc[df_remessa["id_processo"] == x, "label"].values[0],
+    placeholder="Selecione um ou mais processos..."  # <- aqui você troca
+)
+
 
     if ids_sel:
         df_sel = df_remessa[df_remessa["id_processo"].isin(ids_sel)]
@@ -276,6 +276,7 @@ else:
         df_proc.to_csv(CAMINHO_PROC, index=False)
 
         st.success("✅ Processo desarquivado com sucesso e liberado para tramitação.")
+
 
 
 
