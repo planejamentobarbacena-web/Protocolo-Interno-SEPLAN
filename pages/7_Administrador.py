@@ -52,6 +52,7 @@ ROTULOS_SETORES = {
 ROTULOS_DESTINOS = {
     "id_setor": "ID",
     "setor_destino": "Setor de Destino",
+    "secretaria": "Secretaria",
     "ativo": "Ativo"
 }
 
@@ -115,7 +116,7 @@ df_setores = carregar_base(
 
 df_setores_destino = carregar_base(
     CAMINHO_SETORES_DESTINO,
-    ["id_setor", "setor_destino", "ativo"]
+    ["id_setor", "setor_destino", "secretaria", "ativo"]
 )
 
 # =====================================================
@@ -219,39 +220,63 @@ with aba_destinos:
     )
 
     st.divider()
-    st.markdown("### ➕ Cadastrar setor de destino")
+st.markdown("### ➕ Cadastrar setor de destino")
 
-    novo_destino = st.text_input("Nome do setor de destino", key="cad_destino")
+col1, col2 = st.columns(2)
 
-    if st.button("Cadastrar setor de destino", key="btn_cad_destino"):
-        if novo_destino.lower() in df_setores_destino["setor_destino"].str.lower().values:
-            st.error("Destino já existe.")
-        else:
-            novo_id = (
-                df_setores_destino["id_setor"].max() + 1
-                if not df_setores_destino.empty
-                else 1
-            )
+with col1:
+    novo_destino = st.text_input(
+        "Nome do setor de destino *",
+        key="cad_destino"
+    )
 
-            # 🔹 cria linha respeitando TODAS as colunas do CSV
-            nova_linha = pd.DataFrame(
-                [[novo_id, novo_destino, "", 1]],
-                columns=df_setores_destino.columns
-            )
+with col2:
+    secretaria_destino = st.text_input(
+        "Secretaria responsável *",
+        key="cad_secretaria_destino"
+    )
 
-            df_setores_destino = pd.concat(
-                [df_setores_destino, nova_linha],
-                ignore_index=True
-            )
+if st.button("Cadastrar setor de destino", key="btn_cad_destino"):
 
-            salvar_csv_github(
-                df_setores_destino,
-                CAMINHO_SETORES_DESTINO,
-                f"Cadastro destino {novo_destino} via Streamlit"
-            )
+    if not novo_destino.strip():
+        st.error("Informe o nome do setor de destino.")
+    
+    elif not secretaria_destino.strip():
+        st.error("Informe a secretaria responsável.")
+    
+    elif novo_destino.lower() in df_setores_destino["setor_destino"].str.lower().values:
+        st.error("Este setor de destino já está cadastrado.")
+    
+    else:
+        novo_id = (
+            df_setores_destino["id_setor"].max() + 1
+            if not df_setores_destino.empty
+            else 1
+        )
 
-            st.session_state.msg_sucesso = "Setor de destino cadastrado."
-            st.rerun()
+        nova_linha = pd.DataFrame(
+            [[
+                novo_id,
+                novo_destino.strip(),
+                secretaria_destino.strip(),
+                1
+            ]],
+            columns=df_setores_destino.columns
+        )
+
+        df_setores_destino = pd.concat(
+            [df_setores_destino, nova_linha],
+            ignore_index=True
+        )
+
+        salvar_csv_github(
+            df_setores_destino,
+            CAMINHO_SETORES_DESTINO,
+            f"Cadastro destino {novo_destino} via Streamlit"
+        )
+
+        st.session_state.msg_sucesso = "Setor de destino cadastrado com sucesso."
+        st.rerun()
 
     st.divider()
     st.markdown("### ✏️ Ativar / Desativar destino")
@@ -305,5 +330,6 @@ with aba_destinos:
 
         st.session_state.msg_sucesso = "Setor de destino excluído."
         st.rerun()
+
 
 
