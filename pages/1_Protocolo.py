@@ -17,7 +17,7 @@ setor_logado = st.session_state.get("setor", "Não informado")
 st.title("📄 Registro de Protocolo")
 st.markdown("Preencha os dados do documento recebido para iniciar o processo.")
 
-CAMINHO_PROC = "data/Processos.csv"
+CAMINHO_PROC = "data/processos.csv"
 
 # 📌 Formulário
 with st.form("form_protocolo"):
@@ -121,3 +121,4 @@ if registrar:
     # ✅ Mensagem final
     st.success(f"✅ Protocolo nº {numero_protocolo} criado com sucesso!")
     st.info("O processo já está disponível para tramitação.")
+
