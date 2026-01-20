@@ -1,6 +1,2 @@
 usuario,nome_completo,senha,perfil,setor
-ana,ana maria,1234,Servidor,Protocolo
-fabio,Fábio Júnior,1234,Chefia,Departamento
-mauro,Mauro NEVES,432100,Servidor,Diretoria
-secretario,Secretário SEPLAN,1234,Secretario,Secretaria
 admin,Administrador do Sistema Atual,admin,Administrador,Geral
