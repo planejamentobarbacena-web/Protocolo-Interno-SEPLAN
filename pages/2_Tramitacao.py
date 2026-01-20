@@ -18,7 +18,7 @@ st.title("🧭 Tramitação de Processos")
 # 📂 CARREGAR BASES
 # =========================================================
 
-df_proc = pd.read_csv("data/Processos.csv")
+df_proc = pd.read_csv("data/processos.csv")
 df_and = pd.read_csv("data/andamentos.csv")
 df_setores = pd.read_csv("data/setores.csv")
 
@@ -165,7 +165,8 @@ if st.button("📤 Registrar andamento"):
         "Em Trâmite"
     ]
 
-    df_proc.to_csv("data/Processos.csv", index=False)
+    df_proc.to_csv("data/processos.csv", index=False)
 
     st.success(f"✅ Andamento registrado e enviado para {setor_destino}")
+
 
