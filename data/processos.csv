@@ -1,0 +1,5 @@
+id_processo,numero_protocolo,data_entrada,numero_referencia,setor_origem,assunto,descricao,acao,setor_atual,status,id_setor_atual
+1,001/2026,2026-01-18 13:12:02.449191,Oficio 100,SEGAB,Reiniciando o teste,Para verificação das informações nos paineis,Desarquivado,Protocolo,Em Trâmite,1
+2,002/2026,2026-01-18 13:12:52.525041,Oficio 456,Para confluencia,Não está funcionando,Vamos testar,Análise,Diretoria,Em Trâmite,5
+3,003/2026,2026-01-19 14:02:18.560433,1233333,4444555,5555555,kkkkkklllllkkk,Análise,Protocolo,Em Trâmite,1
+4,004/2026,2026-01-19 20:54:11.996913,teste de externa,arquivado,para novo,apenas isso,Arquivado / Destinado,Protocolo,Arquivado,1

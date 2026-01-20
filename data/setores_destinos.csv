@@ -1,0 +1,305 @@
+id_setor,setor_destino,secretaria,ativo
+1,Advocacia Geral do Município,AGM,1
+2,Gabinete/ AGM,AGM,1
+3,Diretoria de Procuradoria,AGM,1
+4,Departamento Judicial,AGM,1
+5,Departamento Extrajudicial,AGM,1
+6,Departamento de Interlocução com Órgãos Internos,AGM,1
+7,Departamento de Interlocução com Órgãos Externos,AGM,1
+8,Diretoria de Consultoria,AGM,1
+9,Assessoria Jurídico  AGM,AGM,1
+10,Controladoria Geral do Município,CGEM,1
+11,Gabinete/ CGEM,CGEM,1
+12,Departamento de Governança Preventiva,CGEM,1
+13,Departamento de Controle,CGEM,1
+14,Divisão de Controle Orçamentário e Financeiro,CGEM,1
+15,Departamento de Ouvidoriaia,CGEM,1
+16,Setor de Ouvidoriaia da Saúde,CGEM,1
+17,Departamento de Corregedoriaia,CGEM,1
+18,"Secretaria Municipal de Agricultura, Pecuária e Abastecimento",SEAPA,1
+19,Gabinete/ SEAPA,SEAPA,1
+20,Departamento de Agroindústria,SEAPA,1
+21,Diretoria de Extensão Rural,SEAPA,1
+22,Setor de Agricultura de Precisão,SEAPA,1
+23,Setor de Escola do Campo,SEAPA,1
+24,Setor de Horto Florestal,SEAPA,1
+25,Setor de Patrulha Agrícola,SEAPA,1
+26,Coordenadoria de Manejo Animal,SEAPA,1
+27,Secretaria Municipal de Cultura e Turismo,SECULT,1
+28,Gabinete/ SECULT,SECULT,1
+29,Diretoria de Cultura,SECULT,1
+30,Divisão de Fomento Cultural,SECULT,1
+31,Divisão de Museus,SECULT,1
+32,Coordenadoria de Museu,SECULT,1
+33,Setor de Patrimônio Histórico,SECULT,1
+34,Setor Casa da Cultura,SECULT,1
+35,Diretoria de Turismo e Eventos,SECULT,1
+36,Divisão de Turismo/CAT,SECULT,1
+37,Setor de Eventos,SECULT,1
+38,Coordenadoria de Equipes do Parque de Exposições,SECULT,1
+39,Setor de Ecoturismo e Turismo Rural,SECULT,1
+40,Secretaria Municipal de Desenvolvimento Econômico,SEDEC,1
+41,Gabinete/ SEDEC,SEDEC,1
+42,Diretoria de Desenvolvimento Econômico e Investimentos,SEDEC,1
+43,Divisão de Fomentos e Incentivos Fiscais,SEDEC,1
+44,"Divisão de Apoio ao Comércio, Indústria e Serviços",SEDEC,1
+45,Divisão de Atração de Investimentos,SEDEC,1
+46,Diretoria de Empreendedorismo,SEDEC,1
+47,Divisão de Inovação,SEDEC,1
+48,Divisão de Apoio a Micro e Pequenas Empresas,SEDEC,1
+49,Divisão de Incentivo à Juventude,SEDEC,1
+50,Secretaria Municipal de Educação,SEDUC,1
+51,Subsecretaria  SEDUC,SEDUC,1
+52,Gabinete/ SEDUC,SEDUC,1
+53,Diretoria Pedagógico,SEDUC,1
+54,Departamento de Apoio Escolar  Fundamental I,SEDUC,1
+55,Departamento de Apoio Escolar  Fundamental II,SEDUC,1
+56,Departamento de Apoio Escolar  Educação Infantil,SEDUC,1
+57,Departamento de Educação Inclusiva,SEDUC,1
+58,Departamento de Inspeção Escolar,SEDUC,1
+59,Departamento de Apoio Integral à Criança,SEDUC,1
+60,Departamento Conservatório Municipal,SEDUC,1
+61,Setor de Projetos Artísticos,SEDUC,1
+62,Setor Pedagógico,SEDUC,1
+63,Departamento de Planejamento em Educação,SEDUC,1
+64,Setor de Transporte Escolar,SEDUC,1
+65,Departamento de Alimentação Escolar,SEDUC,1
+66,Departamento Fundo Municipal de Educação,SEDUC,1
+67,Secretaria Municipal de Fazenda,SEFAZ,1
+68,Gabinete/ SEFAZ,SEFAZ,1
+69,Diretoria de Arrecadação e Tributos,SEFAZ,1
+70,Departamento de Tributação,SEFAZ,1
+71,Divisão de Fiscalização Tributária,SEFAZ,1
+72,Divisão de Dívida Ativa,SEFAZ,1
+73,Setor de Lançamento de IPTU e ITBI,SEFAZ,1
+74,Setor de Lançamento de ISS e TAXAS,SEFAZ,1
+75,Diretoria de Contabilidade e Orçamento,SEFAZ,1
+76,Departamento de Contabilidade Geral,SEFAZ,1
+77,Divisão de Qualidade da Informação Contábil,SEFAZ,1
+78,Divisão de Receitas Próprias,SEFAZ,1
+79,Setor de Prestação de Contas,SEFAZ,1
+80,Setor de Análise de Demonstrações Contábeis,SEFAZ,1
+81,Departamento de Escrituração Contábil,SEFAZ,1
+82,Setor de Empenhos e Liquidações,SEFAZ,1
+83,Setor de Execução Orçamentária,SEFAZ,1
+84,Departamento de Finanças,SEFAZ,1
+85,Divisão de Receitas,SEFAZ,1
+86,Setor de Análise de Investimentos,SEFAZ,1
+87,Secretaria Municipal de Gabinete da,SEGAB,1
+88,Gabinete/ SEGAB,SEGAB,1
+89,Assessoria Executivo do Prefeito,SEGAB,1
+90,Assessoria de Gabinete/do Prefeito,SEGAB,1
+91,Assessoria Executivo do VicePrefeito,SEGAB,1
+92,Assessoria de Gabinete/do VicePrefeito,SEGAB,1
+93,Secretaria Municipal de Governo,SEGOV,1
+94,Gabinete/ SEGOV,SEGOV,1
+95,Diretoria de Comunicação Social,SEGOV,1
+96,Divisão de Jornalismo,SEGOV,1
+97,Setor de Assessoriaia de Imprensa,SEGOV,1
+98,Divisão de Publicidade,SEGOV,1
+99,Divisão de Atendimento ao Público,SEGOV,1
+100,Departamento de Relações Institucionais,SEGOV,1
+101,Setor de Apoio à Participação Popular,SEGOV,1
+102,Setor de Apoio às Entidades,SEGOV,1
+103,Secretaria Municipal de Administração,SEMAD,1
+104,SubSecretaria  SEMAD,SEMAD,1
+105,Gabinete/ SEMAD,SEMAD,1
+106,Diretoria de Aquisições,SEMAD,1
+107,Departamento de Licitações,SEMAD,1
+108,Departamento de Compras,SEMAD,1
+109,Setor Central de Compras,SEMAD,1
+110,Departamento de Parcerias e Convênios,SEMAD,1
+111,Setor de Parcerias e Convênios de Saúde,SEMAD,1
+112,Setor de Parcerias e Convênios de Educação,SEMAD,1
+113,Setor de Parcerias e Convênios de Assistência Social,SEMAD,1
+114,Setor de Parcerias e Convênios de Obras,SEMAD,1
+115,Setor de Parcerias PúblicoPrivadas,SEMAD,1
+116,Setor de Parcerias e Convênios Geral,SEMAD,1
+117,Departamento de Almoxarifado,SEMAD,1
+118,Setor Almoxarifado de Saúde,SEMAD,1
+119,Setor Almoxarifado de Educação,SEMAD,1
+120,Setor de Almoxarifado de Obras,SEMAD,1
+121,Setor de Almoxarifado Segurança Pública,SEMAD,1
+122,Setor de Almoxarifado Geral,SEMAD,1
+123,Departamento de Contratos,SEMAD,1
+124,Setor de Contratos de Saúde,SEMAD,1
+125,Setor de Contratos de Educação,SEMAD,1
+126,Setor de Contratos de Obras,SEMAD,1
+127,Setor de Contratos de Assistência Social,SEMAD,1
+128,Setor de Contratos de Segurança Pública,SEMAD,1
+129,Setor de Contratos Geral,SEMAD,1
+130,Diretoria de Recursos Humanos,SEMAD,1
+131,Divisão de Contato e Organização Funcional da Educação,SEMAD,1
+132,Divisão de Contato e Organização Funcional da Saúde,SEMAD,1
+133,Departamento Pessoal,SEMAD,1
+134,Divisão de Folha de Pagamento,SEMAD,1
+135,Divisão de Análise de Benefícios,SEMAD,1
+136,Divisão de Desenvolvimento Pessoal,SEMAD,1
+137,Departamento de Segurança e Medicina do Trabalho,SEMAD,1
+138,Divisão de Medicina do Trabalho,SEMAD,1
+139,Divisão de Segurança do Trabalho,SEMAD,1
+140,Diretoria de Tecnologia da Informação,SEMAD,1
+141,Divisão de Infraestrutura,SEMAD,1
+142,Divisão de Sistemas,SEMAD,1
+143,Secretaria Municipal de Assistência Social,SEMAS,1
+144,Gabinete/ SEMAS,SEMAS,1
+145,Diretoria de Programas Sociais,SEMAS,1
+146,Departamento de Alta Complexidade,SEMAS,1
+147,Departamento CRAS,SEMAS,1
+148,Divisão CRAS,SEMAS,1
+149,Departamento CREAS,SEMAS,1
+150,Departamento de Assistência à Infância,SEMAS,1
+151,Departamento de Assistência à Mulher,SEMAS,1
+152,Departamento de Assistência ao Morador de Rua,SEMAS,1
+153,Departamento de Assistência ao Idoso,SEMAS,1
+154,Departamento de Assistência ao Egresso e PréEgresso,SEMAS,1
+155,Setor de Apoio às Instituições,SEMAS,1
+156,Setor de Apoio aos Conselhos,SEMAS,1
+157,Divisão de Políticas Públicas e Habitação,SEMAS,1
+158,Departamento de Planejamento em Assistência Social,SEMAS,1
+159,Departamento Fundo Municipal de Assistência Social,SEMAS,1
+160,Departamento de Transferência de Renda e Cadastro Único,SEMAS,1
+161,"Secretaria Municipal de Esportes, Paradesporto e Lazer",SEMESP,1
+162,Gabinete/ SEMESP,SEMESP,1
+163,Divisão de Espaços Esportivos,SEMESP,1
+164,Departamento de Paradesporto,SEMESP,1
+165,Departamento de Esportes,SEMESP,1
+166,Departamento de Lazer,SEMESP,1
+167,Secretaria Municipal de Meio Ambiente,SEMMA,1
+168,Gabinete/ SEMMA,SEMMA,1
+169,Departamento de Licenciamento,SEMMA,1
+170,Departamento de Fauna e Flora,SEMMA,1
+171,Divisão de Animais Silvestres,SEMMA,1
+172,Departamento de Proteção dos Animais Domésticos,SEMMA,1
+173,Divisão de Parque Ecológico e APP's,SEMMA,1
+174,Departamento de Fiscalização Ambiental,SEMMA,1
+175,Secretaria Municipal de Obras Públicas,SEMOP,1
+176,Subsecretaria  SEMOP,SEMOP,1
+177,Gabinete/ SEMOP,SEMOP,1
+178,Diretoria de Serviço Operacional,SEMOP,1
+179,Divisão de Drenagem,SEMOP,1
+180,Divisão de Pavimentação,SEMOP,1
+181,Divisão de Estradas Vicinais,SEMOP,1
+182,Coordenadoria de Equipe de Distrito,SEMOP,1
+183,Setor de Logística e Serviços,SEMOP,1
+184,Setor de Suporte Operacional,SEMOP,1
+185,Coordenadoria de Equipe de Obra,SEMOP,1
+186,Setor de Fabricação,SEMOP,1
+187,Diretoria de Infraestrutura,SEMOP,1
+188,Departamento de Projetos,SEMOP,1
+189,Divisão de Projetos da Saúde,SEMOP,1
+190,Divisão de Projetos da Educação,SEMOP,1
+191,Secretaria Municipal de Urbanismo,SEMUR,1
+192,Gabinete/ SEMUR,SEMUR,1
+193,Diretoria de Planejamento Urbano,SEMUR,1
+194,Departamento de Regulação Urbana,SEMUR,1
+195,Divisão de Parcelamento do Solo e REURB,SEMUR,1
+196,Divisão de Aprovação de Projetos,SEMUR,1
+197,Departamento de Cadastro,SEMUR,1
+198,Departamento de Geoprocessamento,SEMUR,1
+199,Diretoria de Fiscalização Urbana,SEMUR,1
+200,Secretaria Municipal de Saúde,SESAP,1
+201,Subsecretaria  SESAP,SESAP,1
+202,Gabinete/ SESAP,SESAP,1
+203,Diretoria de Assistência em Saúde,SESAP,1
+204,Departamento Farmacêutico,SESAP,1
+205,Setor Assistencial Farmacêutico,SESAP,1
+206,Departamento de Saúde Bucal,SESAP,1
+207,Divisão de Apoio aos Raros,SESAP,1
+208,Departamento de Saúde Mental,SESAP,1
+209,Divisão de Residências Terapêuticas,SESAP,1
+210,Divisão  Centro de Convivência,SESAP,1
+211,Divisão  CAPS TM,SESAP,1
+212,Divisão  CAPS AD,SESAP,1
+213,Divisão  CAPS I,SESAP,1
+214,Departamento de Vigilância Sanitária,SESAP,1
+215,Departamento de Vigilânica Epidemiológica,SESAP,1
+216,Divisão  CEREST,SESAP,1
+217,"Divisão (CTA)/(SAE) /(CRIE)",SESAP,1
+218,Divisão de Imunização,SESAP,1
+219,Divisão de Zoonoses,SESAP,1
+220,Diretoria de Atenção Primária à Saúde,SESAP,1
+221,Departamento de Programas de Saúde,SESAP,1
+222,Divisão de Saúde da Família,SESAP,1
+223,Divisão de Agentes Comunitários de Saúde,SESAP,1
+224,Divisão de Mobilização Social e Ações de Promoção à Saúde,SESAP,1
+225,Departamento de Gestão da Atenção Primária à Saúde,SESAP,1
+226,Coordenadoria de Distrito Sanitário,SESAP,1
+227,Diretoria de Atenção Especializada,SESAP,1
+228,Departamanto de Planejamento em Saúde,SESAP,1
+229,Divisão de Sistemas e Inovação em Saúde,SESAP,1
+230,Setor de Processamento de Dados e Informações à Saúde,SESAP,1
+231,Departamento de Regulação em Saúde,SESAP,1
+232,Divisão de Tratamento Fora do Domicílio (TFD),SESAP,1
+233,Divisão de Cirurgias Eletivas,SESAP,1
+234,Divisão de Procedimentos Ambulatoriais,SESAP,1
+235,Departamento de Assistência Média e Alta Complexidade,SESAP,1
+236,Divisão do Centro de Especialidades Médicas (CEM),SESAP,1
+237,Setor de Assistência Multidisciplinar (EMULT),SESAP,1
+238,Divisão UPA/UUE,SESAP,1
+239,Divisão de Atenção Domiciliar,SESAP,1
+240,Divisão de Oncologia,SESAP,1
+241,Divisão de Assistência à Pessoa com Deficiência,SESAP,1
+242,Diretoria de Gestão em Saúde,SESAP,1
+243,Divisão de Transporte Sanitário,SESAP,1
+244,Departamento de Auditoria Assistencial,SESAP,1
+245,Departamento Fundo Municipal de Saúde,SESAP,1
+246,Divisão de Contabilidade,SESAP,1
+247,Divisão de Tesouraria,SESAP,1
+248,Gestão de Recursos SUS,SESAP,1
+249,Secretaria Municipal de Serviços Públicos,SESP,1
+250,Subsecretaria  SESP,SESP,1
+251,Gabinete/ SESP,SESP,1
+252,Departamento de Patrimônio,SESP,1
+253,Divisão de Patrimônios Móveis,SESP,1
+254,Setor de Patrimônios Móveis da Saúde,SESP,1
+255,Setor de Patrimônios Móveis da Educação,SESP,1
+256,Setor de Patrimônios Móveis Geral,SESP,1
+257,Divisão de Patrimônios Imóveis,SESP,1
+258,Diretoria de Infraestrutura Predial,SESP,1
+259,Setor de Manutenção,SESP,1
+260,Coordenadoria de Manutenção Predial Geral,SESP,1
+261,Coordenadoria de Manutenção Predial Educação,SESP,1
+262,Coordenadoria de Manutenção Predial Saúde,SESP,1
+263,Setor de Limpeza,SESP,1
+264,Coordenadoria de Limpeza Predial Geral,SESP,1
+265,Coordenadoria de Limpeza Predial Educação,SESP,1
+266,Coordenadoria de Limpeza Predial Saúde,SESP,1
+267,Coordenadoria de Limpeza Predial Assistência Social,SESP,1
+268,Diretoria de Manutenção de Espaços Públicos,SESP,1
+269,Coordenadoria de Praças e Jardins,SESP,1
+270,Coordenadoria de Cemitérios,SESP,1
+271,Divisão de Eficientização de Serviços Públicos,SESP,1
+272,Setor de Trabalho Externo,SESP,1
+273,Setor de Serviços Distritais,SESP,1
+274,Coordenadoria de Distrito,SESP,1
+275,Diretoria de Logística e Transporte,SESP,1
+276,Divisão de Manutenção de Frota,SESP,1
+277,Setor de Máquinas Pesadas,SESP,1
+278,Departamento de Controle de Frota,SESP,1
+279,Setor de Controle de Frota da Saúde,SESP,1
+280,Setor de Controle de Frota da Educação,SESP,1
+281,Setor de Controle de Frota da Obras,SESP,1
+282,Setor de Controle de Frota da Segurança Pública,SESP,1
+283,Setor de de Controle de Frota Geral,SESP,1
+284,Setor Terminal Rodoviário,SESP,1
+285,Divisão de Limpeza Urbana,SESP,1
+286,Coordenadoria de Equipes de Capina e Varrição,SESP,1
+287,Coordenadoria de Equipes de garis,SESP,1
+288,Secretaria Municipal de Segurança Pública,SSP,1
+289,Gabinete/ SSP,SSP,1
+290,Diretoria de Mobilidade Urbana,SSP,1
+291,Departamento de Operações de Trânsito,SSP,1
+292,Divisão de Planejamento de Trânsito,SSP,1
+293,Coordenadoria de Equipe de Educação de Trânsito,SSP,1
+294,Coordenadoria de Equipe de Sinalização Viária,SSP,1
+295,Divisão de Fiscalização de Transporte,SSP,1
+296,Comandante Guarda Civil Municipal,SSP,1
+297,Subcomando da Guarda Civil Municipal,SSP,1
+298,Diretoria de Defesa Civil,SSP,1
+299,Divisão de Prevenção de Desastres,SSP,1
+300,Divisão de Acompanhamento Operacional,SSP,1
+301,Coordenadoria de Apreensão Animal,SSP,1
+302,Departamento Centro de Controle Operacional (CCO),SSP,1
+303,Corregedoria da Guarda Civil Municipal,SSP,1
+304,Ouvidoria da GCM,SSP,1
