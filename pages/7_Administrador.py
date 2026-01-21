@@ -143,7 +143,7 @@ with aba_usuarios:
     with col1: usuario = st.text_input("Usuário", key="cad_usuario")
     with col2: nome = st.text_input("Servidor", key="cad_nome")
     with col3: senha = st.text_input("Senha", type="password", key="cad_senha")
-    with col4: perfil = st.selectbox("Perfil", ["Servidor", "Chefia", "Secretario", "Administrador"], key="cad_perfil")
+    with col4: perfil = st.selectbox("Perfil", ["Servidor", "Chefia", "Secretario", "Protocolo", "Administrador"], key="cad_perfil")
     with col5: setor = st.selectbox(
         "Setor",
         df_setores[df_setores["ativo"] == 1]["setor"].tolist(),
@@ -280,3 +280,4 @@ with aba_destinos:
         salvar_csv_github(df_setores_destino, CAMINHO_SETORES_DESTINO, f"Exclusão destino {destino_exc}")
         st.session_state.msg_destino = "Setor de destino excluído."
         st.rerun()
+
