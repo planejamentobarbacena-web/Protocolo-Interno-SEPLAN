@@ -4,3 +4,4 @@ id_andamento,id_processo,data,servidor,perfil,acao,observacao,setor_origem,setor
 3,3,2026-01-21 14:36:54,admin,Administrador,Protocolo Inicial,esse,02,Protocolo
 4,1,2026-01-21 14:45:22,admin,Administrador,Análise,teste do 01,Protocolo,Modernização Administrativa
 5,2,2026-01-21 15:00:27,admin,Administrador,Análise,teste painel arqvivo,Protocolo,Protocolo
+6,2,2026-01-21 15:02:21,admin,Administrador,Atualização,arquivamento,Protocolo,Secretaria
