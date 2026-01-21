@@ -29,21 +29,42 @@ st.title("📊 Gestão de Servidores")
 # =====================================================
 df_proc = pd.read_csv("data/processos.csv")
 df_and = pd.read_csv("data/andamentos.csv")
+df_users = pd.read_csv("data/usuarios.csv")
 
 df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce")
 df_proc["data_entrada"] = pd.to_datetime(df_proc["data_entrada"], errors="coerce")
+
+# =====================================================
+# SERVIDORES VÁLIDOS (BASEADOS NO USUÁRIOS.CSV)
+# =====================================================
+perfis_validos = ["Servidor", "Chefia", "Protocolo"]
+
+df_servidores = df_users[df_users["perfil"].isin(perfis_validos)]
+
+if df_servidores.empty:
+    st.warning("Nenhum servidor cadastrado para consulta.")
+    st.stop()
+
+mapa_servidores = dict(
+    zip(
+        df_servidores["nome_completo"],
+        df_servidores["usuario"]
+    )
+)
 
 # =====================================================
 # SELEÇÃO DO SERVIDOR
 # =====================================================
 st.subheader("🔍 Consulta por Servidor")
 
-servidor_sel = st.selectbox(
+nome_servidor = st.selectbox(
     "Selecione o servidor",
-    sorted(df_and["servidor"].dropna().unique())
+    sorted(mapa_servidores.keys())
 )
 
-hist_servidor = df_and[df_and["servidor"] == servidor_sel].copy()
+usuario_sel = mapa_servidores[nome_servidor]
+
+hist_servidor = df_and[df_and["usuario"] == usuario_sel].copy()
 
 if hist_servidor.empty:
     st.info("Nenhum registro encontrado para o servidor selecionado.")
@@ -129,12 +150,12 @@ st.dataframe(
 # =====================================================
 st.subheader("📄 Gerar PDF do Histórico")
 
-nome_pdf = f"historico_{servidor_sel.replace(' ', '_')}.pdf"
-logo_path = "logo.png"  # ajuste se necessário
+nome_pdf = f"historico_{usuario_sel}.pdf"
+logo_path = "logo.png"
 
 if st.button("📄 Gerar PDF"):
     caminho_pdf = gerar_pdf_4(
-        servidor=servidor_sel,
+        servidor=nome_servidor,
         historico=hist_servidor,
         nome_arquivo=nome_pdf,
         tipo_relatorio=modo,
@@ -149,4 +170,3 @@ if st.button("📄 Gerar PDF"):
             file_name=nome_pdf,
             mime="application/pdf"
         )
-
