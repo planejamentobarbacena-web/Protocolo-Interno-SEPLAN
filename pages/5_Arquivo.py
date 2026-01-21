@@ -114,46 +114,37 @@ if perfil_usuario not in ["Administrador", "Secretario", "Protocolo"]:
     st.stop()
 
 # =====================================================
-# CARREGAR DADOS
+# CARREGAR DADOS DO GITHUB
 # =====================================================
-try:
-    arquivo_proc = repo.get_contents(CAMINHO_PROC, ref=BRANCH)
-    df_proc = pd.read_csv(pd.compat.StringIO(arquivo_proc.decoded_content.decode("utf-8")))
-except:
-    df_proc = pd.DataFrame(columns=[
-        "id_processo","numero_protocolo","data_entrada","numero_referencia",
-        "setor_origem","assunto","descricao","setor_atual","status","id_setor_atual"
-    ])
+def carregar_csv_github(caminho, colunas):
+    try:
+        arquivo = repo.get_contents(caminho, ref=BRANCH)
+        df = pd.read_csv(pd.compat.StringIO(arquivo.decoded_content.decode("utf-8")))
+    except:
+        df = pd.DataFrame(columns=colunas)
+    return df
 
-try:
-    arquivo_dest = repo.get_contents(CAMINHO_DESTINACOES, ref=BRANCH)
-    df_dest = pd.read_csv(pd.compat.StringIO(arquivo_dest.decoded_content.decode("utf-8")))
-except:
-    df_dest = pd.DataFrame(columns=[
-        "id_destinacao","id_processo","data_saida","protocolista","destino","observacao"
-    ])
-
+df_proc = carregar_csv_github(CAMINHO_PROC, [
+    "id_processo","numero_protocolo","data_entrada","numero_referencia",
+    "setor_origem","assunto","descricao","setor_atual","status","id_setor_atual","acao"
+])
+df_dest = carregar_csv_github(CAMINHO_DESTINACOES, [
+    "id_destinacao","id_processo","data_saida","protocolista","destino","observacao"
+])
 df_setores_destino = carregar_csv(CAMINHO_SETOR_DESTINO)
+df_and = carregar_csv_github(CAMINHO_AND, [
+    "id_andamento","id_processo","data","servidor","perfil",
+    "acao","observacao","setor_origem","setor_destino"
+])
+df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce")
 
 # =====================================================
-# ATUALIZAR SETOR_ATUAL A PARTIR DOS ANDAMENTOS
+# ATUALIZAR SETOR_ATUAL A PARTIR DOS ÚLTIMOS ANDAMENTOS
 # =====================================================
-try:
-    arquivo_and = repo.get_contents(CAMINHO_AND, ref=BRANCH)
-    df_and = pd.read_csv(pd.compat.StringIO(arquivo_and.decoded_content.decode("utf-8")))
-    df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce")
-
-    ultimos_andamentos = (
-        df_and.sort_values("data")
-        .groupby("id_processo")
-        .tail(1)
-    )
-
-    df_proc["setor_atual"] = df_proc["id_processo"].map(
-        ultimos_andamentos.set_index("id_processo")["setor_destino"]
-    )
-except:
-    pass
+ultimos_andamentos = df_and.sort_values("data").groupby("id_processo").tail(1)
+df_proc["setor_atual"] = df_proc["id_processo"].map(
+    ultimos_andamentos.set_index("id_processo")["setor_destino"]
+).fillna(df_proc["setor_atual"])
 
 # =====================================================
 # PROCESSOS JÁ ENCAMINHADOS
@@ -166,21 +157,15 @@ if not df_dest.empty:
     )
 
     st.markdown("### 📦 Processos já encaminhados externamente")
-
     st.dataframe(
         df_encaminhados[[
-            "numero_protocolo",
-            "numero_referencia",
-            "setor_origem",
-            "destino",
-            "data_saida"
-        ]]
-        .rename(columns={
-            "numero_protocolo": "Processo",
-            "numero_referencia": "Referência",
-            "setor_origem": "Setor Origem",
-            "destino": "Setor Destino",
-            "data_saida": "Data da Tramitação"
+            "numero_protocolo","numero_referencia","setor_origem","destino","data_saida"
+        ]].rename(columns={
+            "numero_protocolo":"Processo",
+            "numero_referencia":"Referência",
+            "setor_origem":"Setor Origem",
+            "destino":"Setor Destino",
+            "data_saida":"Data da Tramitação"
         }),
         use_container_width=True
     )
@@ -195,40 +180,29 @@ if df_dest.empty:
     st.info("📭 Não há processos destinados para gerar remessa.")
 else:
     df_remessa = df_proc.merge(
-        df_dest[["id_processo", "destino"]],
+        df_dest[["id_processo","destino"]],
         on="id_processo",
         how="inner"
     )
-
     df_remessa["label"] = (
-        df_remessa["numero_protocolo"].astype(str).fillna("") + " - " +
-        df_remessa["assunto"].astype(str).fillna("") + " (" +
-        df_remessa["destino"].astype(str).fillna("") + ")"
+        df_remessa["numero_protocolo"].astype(str) + " - " +
+        df_remessa["assunto"].astype(str) + " (" +
+        df_remessa["destino"].astype(str) + ")"
     )
 
     ids_sel = st.multiselect(
         "Selecione os processos que irão compor a remessa",
         df_remessa["id_processo"].tolist(),
-        format_func=lambda x: df_remessa.loc[
-            df_remessa["id_processo"] == x, "label"
-        ].values[0]
+        format_func=lambda x: df_remessa.loc[df_remessa["id_processo"] == x, "label"].values[0]
     )
 
     if ids_sel and st.button("📄 Gerar Remessa em PDF"):
         df_sel = df_remessa[df_remessa["id_processo"].isin(ids_sel)]
-
         processos_pdf = df_sel[[
-            "destino",
-            "numero_protocolo",
-            "numero_referencia",
-            "assunto"
-        ]].rename(columns={"destino": "setor_destino"}).to_dict("records")
+            "destino","numero_protocolo","numero_referencia","assunto"
+        ]].rename(columns={"destino":"setor_destino"}).to_dict("records")
 
-        caminho_pdf = os.path.join(
-            tempfile.gettempdir(),
-            "remessa_envio_processos.pdf"
-        )
-
+        caminho_pdf = os.path.join(tempfile.gettempdir(), "remessa_envio_processos.pdf")
         gerar_pdf_remessa_multi_setor(processos_pdf, caminho_pdf)
 
         with open(caminho_pdf, "rb") as f:
@@ -261,18 +235,14 @@ else:
         "Selecione o Processo",
         df_disponiveis["id_processo"],
         format_func=lambda x: (
-            f"{df_disponiveis.loc[df_disponiveis['id_processo'] == x, 'numero_protocolo'].values[0]}"
-            f" - {df_disponiveis.loc[df_disponiveis['id_processo'] == x, 'assunto'].values[0]}"
+            f"{df_disponiveis.loc[df_disponiveis['id_processo']==x,'numero_protocolo'].values[0]}"
+            f" - {df_disponiveis.loc[df_disponiveis['id_processo']==x,'assunto'].values[0]}"
         )
     )
 
-    destinos_ativos = df_setores_destino[df_setores_destino["ativo"] == 1]
+    destinos_ativos = df_setores_destino[df_setores_destino["ativo"]==1]
 
-    destino_sel = st.selectbox(
-        "Setor de Destino",
-        destinos_ativos["setor_destino"]
-    )
-
+    destino_sel = st.selectbox("Setor de Destino", destinos_ativos["setor_destino"])
     observacao = st.text_area("Observação (opcional)")
 
     if st.button("📦 Registrar Tramitação"):
@@ -285,15 +255,11 @@ else:
         )
 
         df_proc.loc[
-            df_proc["id_processo"] == id_proc_sel,
-            ["status", "acao"]
-        ] = ["Arquivado", "Arquivado / Destinado"]
+            df_proc["id_processo"]==id_proc_sel,
+            ["status","acao","setor_atual"]
+        ] = ["Arquivado","Arquivado / Destinado",destino_sel]
 
-        salvar_csv_github(
-            df_proc,
-            CAMINHO_PROC,
-            f"Arquivar e destinar processo {id_proc_sel}"
-        )
+        salvar_csv_github(df_proc, CAMINHO_PROC, f"Arquivar e destinar processo {id_proc_sel}")
 
         st.success(f"✅ Processo arquivado e encaminhado ({novo_id})")
 
@@ -303,29 +269,18 @@ else:
 st.divider()
 st.markdown("## ♻️ Desarquivar Processo")
 
-df_arquivados = df_proc[df_proc["status"] == "Arquivado"]
+df_arquivados = df_proc[df_proc["status"]=="Arquivado"]
 
 if df_arquivados.empty:
     st.info("📂 Não há processos arquivados disponíveis para desarquivamento.")
 else:
     df_arquivados = df_arquivados.copy()
+    df_arquivados["label"] = df_arquivados["numero_protocolo"] + " - " + df_arquivados["assunto"]
 
-    df_arquivados["label"] = (
-        df_arquivados["numero_protocolo"].astype(str)
-        + " - "
-        + df_arquivados["assunto"].astype(str)
-    )
+    mapa_proc = dict(zip(df_arquivados["label"], df_arquivados["id_processo"]))
 
-    mapa_proc = dict(zip(
-        df_arquivados["label"],
-        df_arquivados["id_processo"]
-    ))
-
-    proc_label = st.selectbox(
-        "Selecione o processo arquivado",
-        options=mapa_proc.keys(),
-        key="desarquivar_proc"
-    )
+    proc_label = st.selectbox("Selecione o processo arquivado", options=mapa_proc.keys(), key="desarquivar_proc")
+    id_proc_des = mapa_proc[proc_label]
 
     observacao_des = st.text_area(
         "Observação do desarquivamento",
@@ -334,16 +289,10 @@ else:
 
     if st.button("♻️ Desarquivar Processo"):
         df_proc.loc[
-            df_proc["id_processo"] == id_proc_des,
-            ["status", "acao"]
-        ] = ["Em Trâmite", "Desarquivado"]
+            df_proc["id_processo"]==id_proc_des,
+            ["status","acao"]
+        ] = ["Em Trâmite","Desarquivado"]
 
-        salvar_csv_github(
-            df_proc,
-            CAMINHO_PROC,
-            f"Desarquivar processo {id_proc_des}"
-        )
+        salvar_csv_github(df_proc, CAMINHO_PROC, f"Desarquivar processo {id_proc_des}")
 
-        st.success(
-            "✅ Processo desarquivado com sucesso e liberado para tramitação."
-        )
+        st.success("✅ Processo desarquivado com sucesso e liberado para tramitação.")
