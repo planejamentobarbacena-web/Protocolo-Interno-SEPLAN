@@ -3,8 +3,16 @@ import pandas as pd
 from io import StringIO
 from github import Github
 from datetime import datetime
+import pytz  # <- import para fuso horário
 
 st.set_page_config(page_title="Tramitação de Processos", layout="wide")
+
+# =====================================================
+# FUNÇÃO HORÁRIO BRASÍLIA
+# =====================================================
+def agora_brasilia():
+    fuso = pytz.timezone("America/Sao_Paulo")
+    return datetime.now(fuso)
 
 # 🔐 BLOQUEIO DE ACESSO
 if "usuario" not in st.session_state:
@@ -76,7 +84,10 @@ try:
 except:
     df_setores = pd.DataFrame(columns=["id_setor","setor","ativo"])
 
-df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce")
+# =========================================================
+# CONVERSÃO DATA/HORA PARA BRASÍLIA
+# =========================================================
+df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce").dt.tz_localize('UTC').dt.tz_convert('America/Sao_Paulo')
 
 # =========================================================
 # PROCESSOS NO SETOR DO USUÁRIO
@@ -131,7 +142,7 @@ hist = df_and[df_and["id_processo"] == id_processo].copy()
 if hist.empty:
     st.info("Nenhum andamento registrado para este processo.")
 else:
-    hist["Data/Hora"] = hist["data"].dt.strftime("%d/%m/%Y %H:%M")
+    hist["Data/Hora"] = hist["data"].dt.strftime("%d/%m/%Y %H:%M")  # <- formato dd/mm/aaaa
     hist_exibir = hist[[
         "Data/Hora","acao","observacao","setor_origem","setor_destino"
     ]].rename(columns={
@@ -171,7 +182,7 @@ if st.button("📤 Registrar andamento"):
     novo_andamento = {
         "id_andamento": novo_and_id,
         "id_processo": id_processo,
-        "data": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "data": agora_brasilia().strftime("%Y-%m-%d %H:%M:%S"),  # <- horário Brasília
         "servidor": usuario,
         "perfil": st.session_state.get("perfil","Servidor"),
         "acao": acao,
