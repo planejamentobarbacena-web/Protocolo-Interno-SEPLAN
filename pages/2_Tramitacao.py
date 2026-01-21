@@ -3,18 +3,15 @@ import pandas as pd
 from io import StringIO
 from github import Github
 from datetime import datetime
-import pytz  # <- import para fuso horário
 
+# =========================================================
+# CONFIGURAÇÃO DA PÁGINA
+# =========================================================
 st.set_page_config(page_title="Tramitação de Processos", layout="wide")
 
-# =====================================================
-# FUNÇÃO HORÁRIO BRASÍLIA
-# =====================================================
-def agora_brasilia():
-    fuso = pytz.timezone("America/Sao_Paulo")
-    return datetime.now(fuso)
-
-# 🔐 BLOQUEIO DE ACESSO
+# =========================================================
+# BLOQUEIO DE ACESSO
+# =========================================================
 if "usuario" not in st.session_state:
     st.warning("Acesso restrito. Faça login.")
     st.stop()
@@ -54,7 +51,7 @@ def salvar_csv_github(df, caminho, mensagem):
         )
 
 # =========================================================
-# CAMINHOS
+# CAMINHOS DOS ARQUIVOS
 # =========================================================
 CAMINHO_PROC = "data/processos.csv"
 CAMINHO_AND = "data/andamentos.csv"
@@ -85,9 +82,13 @@ except:
     df_setores = pd.DataFrame(columns=["id_setor","setor","ativo"])
 
 # =========================================================
-# CONVERSÃO DATA/HORA PARA BRASÍLIA
+# AJUSTE DE FUSO HORÁRIO PARA BRASÍLIA
 # =========================================================
-df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce").dt.tz_localize('UTC').dt.tz_convert('America/Sao_Paulo')
+df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce")
+if df_and["data"].dt.tz is not None:
+    df_and["data"] = df_and["data"].dt.tz_convert("America/Sao_Paulo")
+else:
+    df_and["data"] = df_and["data"].dt.tz_localize("UTC").dt.tz_convert("America/Sao_Paulo")
 
 # =========================================================
 # PROCESSOS NO SETOR DO USUÁRIO
@@ -142,7 +143,7 @@ hist = df_and[df_and["id_processo"] == id_processo].copy()
 if hist.empty:
     st.info("Nenhum andamento registrado para este processo.")
 else:
-    hist["Data/Hora"] = hist["data"].dt.strftime("%d/%m/%Y %H:%M")  # <- formato dd/mm/aaaa
+    hist["Data/Hora"] = hist["data"].dt.strftime("%d/%m/%Y %H:%M")
     hist_exibir = hist[[
         "Data/Hora","acao","observacao","setor_origem","setor_destino"
     ]].rename(columns={
@@ -182,7 +183,7 @@ if st.button("📤 Registrar andamento"):
     novo_andamento = {
         "id_andamento": novo_and_id,
         "id_processo": id_processo,
-        "data": agora_brasilia().strftime("%Y-%m-%d %H:%M:%S"),  # <- horário Brasília
+        "data": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "servidor": usuario,
         "perfil": st.session_state.get("perfil","Servidor"),
         "acao": acao,
