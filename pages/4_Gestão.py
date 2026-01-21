@@ -1,10 +1,9 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-from io import StringIO
-from github import Github
+import pytz
+
 from pdf4_utils import gerar_pdf_4
-import pytz  # para tratar fuso horário
 
 # =====================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -26,107 +25,104 @@ if st.session_state.get("perfil") not in ["Secretario", "Administrador"]:
     st.error("Acesso permitido apenas ao Secretário ou Administrador.")
     st.stop()
 
-usuario_logado = st.session_state["usuario"]
-perfil_logado = st.session_state["perfil"]
-
 st.title("📊 Gestão de Servidores")
 
 # =====================================================
-# GITHUB CONFIG
-# =====================================================
-GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
-REPO_NAME = st.secrets["REPO_NAME"]
-BRANCH = "main"
-
-g = Github(GITHUB_TOKEN)
-repo = g.get_repo(REPO_NAME)
-
-def carregar_csv_github(caminho, colunas=None):
-    try:
-        arquivo = repo.get_contents(caminho, ref=BRANCH)
-        conteudo = arquivo.decoded_content.decode("utf-8")
-        return pd.read_csv(StringIO(conteudo))
-    except Exception as e:
-        st.warning(f"⚠️ Não conseguiu ler do GitHub: {caminho}, criando vazio. Detalhe: {e}")
-        return pd.DataFrame(columns=colunas)
-
-# =====================================================
-# CARREGAR BASES
+# CARREGAMENTO DAS BASES
 # =====================================================
 CAMINHO_PROC = "data/processos.csv"
 CAMINHO_AND = "data/andamentos.csv"
 CAMINHO_USERS = "data/usuarios.csv"
 
-df_proc = carregar_csv_github(CAMINHO_PROC, colunas=[
-    "id_processo","numero_protocolo","data_entrada","numero_referencia",
-    "setor_origem","assunto","descricao","setor_atual","status","id_setor_atual","acao"
-])
-
-df_and = carregar_csv_github(CAMINHO_AND, colunas=[
-    "id_andamento","id_processo","data","servidor","perfil","acao",
-    "observacao","setor_origem","setor_destino"
-])
-
-df_users = carregar_csv_github(CAMINHO_USERS, colunas=[
-    "usuario","senha","perfil","setor","nome_completo"
-])
+df_proc = pd.read_csv(CAMINHO_PROC)
+df_and = pd.read_csv(CAMINHO_AND)
+df_users = pd.read_csv(CAMINHO_USERS)
 
 # =====================================================
-# TRATAMENTO DE DATAS (Fuso horário Brasil)
+# AJUSTE DE HORÁRIO
 # =====================================================
-fuso = pytz.timezone("America/Sao_Paulo")
-df_proc["data_entrada"] = pd.to_datetime(df_proc["data_entrada"], errors="coerce").dt.tz_localize('UTC').dt.tz_convert(fuso)
-df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce").dt.tz_localize('UTC').dt.tz_convert(fuso)
+fuso = "America/Sao_Paulo"
+df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce")
+
+# Ajusta fuso horário corretamente
+if df_and["data"].dt.tz is not None:
+    df_and["data"] = df_and["data"].dt.tz_convert(fuso)
+else:
+    df_and["data"] = df_and["data"].dt.tz_localize(fuso)
+
+df_proc["data_entrada"] = pd.to_datetime(df_proc["data_entrada"], errors="coerce")
 
 # =====================================================
-# FILTRAR SERVIDORES COM MOVIMENTAÇÃO
+# SERVIDORES VÁLIDOS (BASEADOS NO USUÁRIOS.CSV)
 # =====================================================
-hist_servidor_base = df_and.dropna(subset=["servidor"]).copy()
-servidores_disponiveis = hist_servidor_base["servidor"].unique()
+perfis_validos = ["Servidor", "Chefia", "Protocolo"]
 
-if len(servidores_disponiveis) == 0:
-    st.info("Nenhum servidor cadastrado para consulta.")
+df_servidores = df_users[df_users["perfil"].isin(perfis_validos)]
+
+if df_servidores.empty:
+    st.warning("Nenhum servidor cadastrado para consulta.")
     st.stop()
+
+mapa_servidores = dict(
+    zip(
+        df_servidores["nome_completo"],
+        df_servidores["usuario"]
+    )
+)
 
 # =====================================================
 # SELEÇÃO DO SERVIDOR
 # =====================================================
 st.subheader("🔍 Consulta por Servidor")
+
+servidores_disponiveis = (
+    df_and["servidor"]
+    .dropna()
+    .astype(str)
+    .sort_values()
+    .unique()
+)
+
+if len(servidores_disponiveis) == 0:
+    st.info("Nenhum servidor cadastrado para consulta.")
+    st.stop()
+
 servidor_sel = st.selectbox(
     "Selecione o servidor",
     servidores_disponiveis
 )
 
-hist_servidor = hist_servidor_base[hist_servidor_base["servidor"] == servidor_sel].copy()
+hist_servidor = df_and[df_and["servidor"] == servidor_sel].copy()
 
 # =====================================================
-# FILTRO POR PERÍODO (DD/MM/AAAA)
+# FILTRO POR PERÍODO
 # =====================================================
 st.subheader("📅 Filtrar por Período")
+
 col1, col2 = st.columns(2)
 
 data_inicio = col1.date_input(
     "Data de Início",
-    value=hist_servidor["data"].min().date() if not hist_servidor.empty else datetime.now(fuso).date(),
+    value=hist_servidor["data"].dt.date.min(),
     format="DD/MM/YYYY"
 )
 
 data_fim = col2.date_input(
     "Data Final",
-    value=hist_servidor["data"].max().date() if not hist_servidor.empty else datetime.now(fuso).date(),
+    value=hist_servidor["data"].dt.date.max(),
     format="DD/MM/YYYY"
 )
 
 hist_servidor = hist_servidor[
     (hist_servidor["data"].dt.date >= data_inicio) &
     (hist_servidor["data"].dt.date <= data_fim)
-].copy()
+]
 
 # =====================================================
 # VINCULAR STATUS DO PROCESSO
 # =====================================================
 hist_servidor = hist_servidor.merge(
-    df_proc[["id_processo","status"]],
+    df_proc[["id_processo", "status"]],
     on="id_processo",
     how="left"
 )
@@ -136,7 +132,10 @@ hist_servidor = hist_servidor.merge(
 # =====================================================
 tipo_relatorio = st.radio(
     "Tipo de Relatório",
-    ("Relatório por momento de movimentação","Relatório por processo")
+    (
+        "Relatório por momento de movimentação",
+        "Relatório por processo"
+    )
 )
 
 modo = "por_momento" if "momento" in tipo_relatorio else "por_processo"
@@ -149,7 +148,15 @@ hist_display["data"] = hist_display["data"].dt.strftime("%d/%m/%Y %H:%M")
 
 st.dataframe(
     hist_display.sort_values("data")[
-        ["id_processo","data","acao","status","observacao","setor_origem","setor_destino"]
+        [
+            "id_processo",
+            "data",
+            "acao",
+            "status",
+            "observacao",
+            "setor_origem",
+            "setor_destino"
+        ]
     ].rename(columns={
         "id_processo": "Processo",
         "data": "Data",
@@ -177,7 +184,7 @@ if st.button("📄 Gerar PDF"):
         nome_arquivo=nome_pdf,
         tipo_relatorio=modo,
         logo_path=logo_path,
-        usuario_emissor=usuario_logado
+        usuario_emissor=st.session_state["usuario"]
     )
 
     with open(caminho_pdf, "rb") as f:
