@@ -1,12 +1,13 @@
 id_andamento,id_processo,data,servidor,perfil,acao,observacao,setor_origem,setor_destino
-1,1,2026-01-21 14:30:53,admin,Administrador,Protocolo Inicial,verificação de gravação,Casa,Protocolo
-2,2,2026-01-21 14:36:36,admin,Administrador,Protocolo Inicial,vamos,01,Protocolo
-3,3,2026-01-21 14:36:54,admin,Administrador,Protocolo Inicial,esse,02,Protocolo
-4,1,2026-01-21 14:45:22,admin,Administrador,Análise,teste do 01,Protocolo,Modernização Administrativa
-5,2,2026-01-21 15:00:27,admin,Administrador,Análise,teste painel arqvivo,Protocolo,Protocolo
-6,2,2026-01-21 15:02:21,admin,Administrador,Atualização,arquivamento,Protocolo,Secretaria
-7,2,2026-01-21 15:04:11,secretario,Secretario,Conclusão,externo e arquivo,Secretaria,Protocolo
-8,1,2026-01-21 15:32:48,julio,Administrador,Análise,para externo,Modernização Administrativa,Protocolo
-9,1,2026-01-21 16:06:49,admin,Administrador,Análise,oooo,Protocolo,Protocolo
-10,4,2026-01-21 15:05:18,secretario,Secretario,Protocolo Inicial,olha a hora,brasilia,Secretaria
-11,4,2026-01-21 18:05:45,secretario,Secretario,Encaminhamento,seguimento do horario,Secretaria,Modernização Administrativa
+1,1,2026-01-21 11:30:53-03:00,admin,Administrador,Protocolo Inicial,verificação de gravação,Casa,Protocolo
+2,2,2026-01-21 11:36:36-03:00,admin,Administrador,Protocolo Inicial,vamos,01,Protocolo
+3,3,2026-01-21 11:36:54-03:00,admin,Administrador,Protocolo Inicial,esse,02,Protocolo
+4,1,2026-01-21 11:45:22-03:00,admin,Administrador,Análise,teste do 01,Protocolo,Modernização Administrativa
+5,2,2026-01-21 12:00:27-03:00,admin,Administrador,Análise,teste painel arqvivo,Protocolo,Protocolo
+6,2,2026-01-21 12:02:21-03:00,admin,Administrador,Atualização,arquivamento,Protocolo,Secretaria
+7,2,2026-01-21 12:04:11-03:00,secretario,Secretario,Conclusão,externo e arquivo,Secretaria,Protocolo
+8,1,2026-01-21 12:32:48-03:00,julio,Administrador,Análise,para externo,Modernização Administrativa,Protocolo
+9,1,2026-01-21 13:06:49-03:00,admin,Administrador,Análise,oooo,Protocolo,Protocolo
+10,4,2026-01-21 12:05:18-03:00,secretario,Secretario,Protocolo Inicial,olha a hora,brasilia,Secretaria
+11,4,2026-01-21 15:05:45-03:00,secretario,Secretario,Encaminhamento,seguimento do horario,Secretaria,Modernização Administrativa
+12,4,2026-01-21 15:10:21,julio,Administrador,Análise,horario,Modernização Administrativa,Protocolo
