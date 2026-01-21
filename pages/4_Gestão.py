@@ -4,6 +4,7 @@ from datetime import datetime
 from io import StringIO
 from github import Github
 from pdf4_utils import gerar_pdf_4
+import pytz  # para tratar fuso horário
 
 # =====================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -41,9 +42,6 @@ g = Github(GITHUB_TOKEN)
 repo = g.get_repo(REPO_NAME)
 
 def carregar_csv_github(caminho, colunas=None):
-    """
-    Tenta ler CSV do GitHub. Se não conseguir, retorna DataFrame vazio com colunas.
-    """
     try:
         arquivo = repo.get_contents(caminho, ref=BRANCH)
         conteudo = arquivo.decoded_content.decode("utf-8")
@@ -74,16 +72,16 @@ df_users = carregar_csv_github(CAMINHO_USERS, colunas=[
 ])
 
 # =====================================================
-# TRATAMENTO DE DATAS
+# TRATAMENTO DE DATAS (Fuso horário Brasil)
 # =====================================================
-df_proc["data_entrada"] = pd.to_datetime(df_proc["data_entrada"], errors="coerce")
-df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce")
+fuso = pytz.timezone("America/Sao_Paulo")
+df_proc["data_entrada"] = pd.to_datetime(df_proc["data_entrada"], errors="coerce").dt.tz_localize('UTC').dt.tz_convert(fuso)
+df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce").dt.tz_localize('UTC').dt.tz_convert(fuso)
 
 # =====================================================
 # FILTRAR SERVIDORES COM MOVIMENTAÇÃO
 # =====================================================
 hist_servidor_base = df_and.dropna(subset=["servidor"]).copy()
-
 servidores_disponiveis = hist_servidor_base["servidor"].unique()
 
 if len(servidores_disponiveis) == 0:
@@ -102,19 +100,21 @@ servidor_sel = st.selectbox(
 hist_servidor = hist_servidor_base[hist_servidor_base["servidor"] == servidor_sel].copy()
 
 # =====================================================
-# FILTRO POR PERÍODO
+# FILTRO POR PERÍODO (DD/MM/AAAA)
 # =====================================================
 st.subheader("📅 Filtrar por Período")
 col1, col2 = st.columns(2)
 
 data_inicio = col1.date_input(
     "Data de Início",
-    value=hist_servidor["data"].min().date() if not hist_servidor.empty else datetime.today().date()
+    value=hist_servidor["data"].min().date() if not hist_servidor.empty else datetime.now(fuso).date(),
+    format="DD/MM/YYYY"
 )
 
 data_fim = col2.date_input(
     "Data Final",
-    value=hist_servidor["data"].max().date() if not hist_servidor.empty else datetime.today().date()
+    value=hist_servidor["data"].max().date() if not hist_servidor.empty else datetime.now(fuso).date(),
+    format="DD/MM/YYYY"
 )
 
 hist_servidor = hist_servidor[
