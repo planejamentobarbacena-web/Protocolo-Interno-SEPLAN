@@ -1,6 +1,12 @@
 import pandas as pd
-from datetime import datetime
 import os
+from datetime import datetime
+import pytz
+
+
+def agora_br():
+    tz = pytz.timezone("America/Sao_Paulo")
+    return datetime.now(tz)
 
 
 def registrar_andamento(
@@ -9,37 +15,49 @@ def registrar_andamento(
     acao,
     observacao,
     setor_origem,
-    setor_destino
+    setor_destino,
+    perfil="Servidor"
 ):
     caminho = "data/andamentos.csv"
 
+    colunas = [
+        "id_andamento",
+        "id_processo",
+        "data",
+        "servidor",
+        "perfil",
+        "acao",
+        "observacao",
+        "setor_origem",
+        "setor_destino"
+    ]
+
     if os.path.exists(caminho):
         df = pd.read_csv(caminho)
-    else:
-        df = pd.DataFrame(columns=[
-            "id_andamento",
-            "id_processo",
-            "data",
-            "servidor",
-            "acao",
-            "observacao",
-            "setor_origem",
-            "setor_destino",
-            "tempo_min"
-        ])
 
-    novo_id = int(df["id_andamento"].max() + 1) if not df.empty else 1
+        # 🔒 GARANTIA DE COLUNAS
+        for col in colunas:
+            if col not in df.columns:
+                df[col] = None
+    else:
+        df = pd.DataFrame(columns=colunas)
+
+    # 🔢 ID seguro
+    if df.empty or df["id_andamento"].isna().all():
+        novo_id = 1
+    else:
+        novo_id = int(df["id_andamento"].dropna().max()) + 1
 
     novo = {
         "id_andamento": novo_id,
         "id_processo": id_processo,
-        "data": datetime.now(),
+        "data": agora_br(),
         "servidor": servidor,
+        "perfil": perfil,
         "acao": acao,
         "observacao": observacao,
         "setor_origem": setor_origem,
-        "setor_destino": setor_destino,
-        "tempo_min": 0
+        "setor_destino": setor_destino
     }
 
     df = pd.concat([df, pd.DataFrame([novo])], ignore_index=True)
