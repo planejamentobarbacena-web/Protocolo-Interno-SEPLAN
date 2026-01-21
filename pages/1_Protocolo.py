@@ -100,26 +100,31 @@ if registrar:
         df_and = pd.read_csv(CAMINHO_AND)
     else:
         df_and = pd.DataFrame(columns=[
-            "id_processo",
-            "data",
-            "servidor",
-            "perfil",
-            "acao",
-            "observacao",
-            "setor_origem",
-            "setor_destino"
-        ])
+    "id_andamento",
+    "id_processo",
+    "data",
+    "servidor",
+    "perfil",
+    "acao",
+    "observacao",
+    "setor_origem",
+    "setor_destino"
+])
+
+    novo_id_andamento = 1 if df_and.empty else int(df_and["id_andamento"].max()) + 1
 
     novo_andamento = {
-        "id_processo": novo_id,
-        "data": datetime.now(),
-        "servidor": usuario_logado,
-        "perfil": perfil_logado,
-        "acao": "Protocolo Inicial",
-        "observacao": descricao,
-        "setor_origem": setor_origem if setor_origem else "Externo",
-        "setor_destino": "Protocolo"
-    }
+    "id_andamento": novo_id_andamento,
+    "id_processo": novo_id,
+    "data": datetime.now(),
+    "servidor": usuario_logado,
+    "perfil": perfil_logado,
+    "acao": "Protocolo Inicial",
+    "observacao": descricao,
+    "setor_origem": setor_origem if setor_origem else "Externo",
+    "setor_destino": "Protocolo"
+}
+
 
     df_and = pd.concat([df_and, pd.DataFrame([novo_andamento])], ignore_index=True)
     df_and.to_csv(CAMINHO_AND, index=False)
@@ -129,3 +134,4 @@ if registrar:
     # =====================================================
     st.success(f"✅ Protocolo nº {numero_protocolo} criado com sucesso!")
     st.info("O processo já está disponível para tramitação.")
+
