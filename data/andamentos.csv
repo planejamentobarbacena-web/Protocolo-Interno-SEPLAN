@@ -8,3 +8,4 @@ id_andamento,id_processo,data,servidor,perfil,acao,observacao,setor_origem,setor
 7,2,2026-01-21 15:04:11,secretario,Secretario,Conclusão,externo e arquivo,Secretaria,Protocolo
 8,1,2026-01-21 15:32:48,julio,Administrador,Análise,para externo,Modernização Administrativa,Protocolo
 9,1,2026-01-21 16:06:49,admin,Administrador,Análise,oooo,Protocolo,Protocolo
+10,4,2026-01-21 15:05:18,secretario,Secretario,Protocolo Inicial,olha a hora,brasilia,Secretaria
