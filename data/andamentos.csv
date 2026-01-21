@@ -1,4 +1,5 @@
 id_andamento,id_processo,data,servidor,perfil,acao,observacao,setor_origem,setor_destino
-1,1,2026-01-21 16:38:25,julio,Administrador,Protocolo Inicial,Protocolo de documentação enviada a SEPLAN,Prefeitura,Modernização Administrativa
-2,2,2026-01-21 16:39:30,julio,Administrador,Protocolo Inicial,Solicitação ao DPO,SIMPAS,Modernização Administrativa
-3,3,2026-01-21 16:40:09,julio,Administrador,Protocolo Inicial,Valor de repasse mensal,Câmara,Modernização Administrativa
+1,1,2026-01-21 16:38:25-03:00,julio,Administrador,Protocolo Inicial,Protocolo de documentação enviada a SEPLAN,Prefeitura,Modernização Administrativa
+2,2,2026-01-21 16:39:30-03:00,julio,Administrador,Protocolo Inicial,Solicitação ao DPO,SIMPAS,Modernização Administrativa
+3,3,2026-01-21 16:40:09-03:00,julio,Administrador,Protocolo Inicial,Valor de repasse mensal,Câmara,Modernização Administrativa
+4,1,2026-01-21 19:41:49,julio,Administrador,Análise,Verificação quanto à continuidade.,Modernização Administrativa,Gabinete SEPLAN
