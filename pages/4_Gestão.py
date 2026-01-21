@@ -57,18 +57,22 @@ mapa_servidores = dict(
 # =====================================================
 st.subheader("🔍 Consulta por Servidor")
 
-nome_servidor = st.selectbox(
-    "Selecione o servidor",
-    sorted(mapa_servidores.keys())
+servidores_disponiveis = (
+    df_and["servidor"]
+    .dropna()
+    .astype(str)
+    .sort_values()
+    .unique()
 )
 
-usuario_sel = mapa_servidores[nome_servidor]
-
-hist_servidor = df_and[df_and["usuario"] == usuario_sel].copy()
-
-if hist_servidor.empty:
-    st.info("Nenhum registro encontrado para o servidor selecionado.")
+if len(servidores_disponiveis) == 0:
+    st.info("Nenhum servidor cadastrado para consulta.")
     st.stop()
+
+servidor_sel = st.selectbox(
+    "Selecione o servidor",
+    servidores_disponiveis
+)
 
 # =====================================================
 # FILTRO POR PERÍODO
@@ -170,3 +174,4 @@ if st.button("📄 Gerar PDF"):
             file_name=nome_pdf,
             mime="application/pdf"
         )
+
