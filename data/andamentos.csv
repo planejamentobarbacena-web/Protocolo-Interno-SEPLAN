@@ -1,1 +1,2 @@
-id_andamento,id_processo,data,servidor,acao,observacao,setor_origem,setor_destino,tempo_min
+id_andamento,id_processo,data,servidor,perfil,acao,observacao,setor_origem,setor_destino
+1,1,2026-01-21 00:55:12,admin,Administrador,Protocolo Inicial,volta,hoje,Protocolo
