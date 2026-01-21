@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from io import StringIO
 import tempfile
 from pdf6_utils import gerar_pdf_remessa_multi_setor
 from github import Github
@@ -15,35 +16,25 @@ st.set_page_config(
 )
 
 # =====================================================
-# CONFIGURAÇÃO GITHUB
+# BLOQUEIO DE ACESSO
 # =====================================================
-GITHUB_TOKEN = st.secrets.get("GITHUB_TOKEN")
-REPO_NAME = st.secrets.get("REPO_NAME")
+if "usuario" not in st.session_state:
+    st.error("⛔ Acesso restrito. Faça login.")
+    st.stop()
+
+usuario_logado = st.session_state["usuario"]
+perfil_logado = st.session_state.get("perfil", "Servidor")
+setor_logado = st.session_state.get("setor", "Protocolo")
+
+# =====================================================
+# GITHUB CONFIG
+# =====================================================
+GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
+REPO_NAME = st.secrets["REPO_NAME"]
 BRANCH = "main"
 
 g = Github(GITHUB_TOKEN)
 repo = g.get_repo(REPO_NAME)
-
-# =====================================================
-# CAMINHOS DOS ARQUIVOS NO REPO
-# =====================================================
-CAMINHO_PROC = "data/processos.csv"
-CAMINHO_DESTINACOES = "data/destinacoes.csv"
-CAMINHO_SETOR_DESTINO = "data/setores_destinos.csv"
-CAMINHO_USUARIOS = "data/usuarios.csv"
-
-# =====================================================
-# FUNÇÕES AUXILIARES
-# =====================================================
-def carregar_csv_github(caminho, colunas=None):
-    """Carrega CSV diretamente do GitHub"""
-    try:
-        arquivo = repo.get_contents(caminho, ref=BRANCH)
-        df = pd.read_csv(pd.compat.StringIO(arquivo.decoded_content.decode("utf-8")))
-    except:
-        df = pd.DataFrame(columns=colunas) if colunas else pd.DataFrame()
-        st.warning(f"⚠️ Não conseguiu ler do GitHub: {caminho}, criando vazio.")
-    return df
 
 def salvar_csv_github(df, caminho, mensagem):
     csv_bytes = df.to_csv(index=False).encode("utf-8")
@@ -64,33 +55,22 @@ def salvar_csv_github(df, caminho, mensagem):
             branch=BRANCH
         )
 
-def registrar_destinacao(id_processo, data_saida, protocolista, destino, observacao):
-    colunas = ["id_destinacao","id_processo","data_saida","protocolista","destino","observacao"]
-    df_dest = carregar_csv_github(CAMINHO_DESTINACOES, colunas)
-    novo_id = 1 if df_dest.empty else df_dest["id_destinacao"].max() + 1
-    df_dest.loc[len(df_dest)] = [novo_id, id_processo, data_saida, protocolista, destino, observacao]
-    salvar_csv_github(df_dest, CAMINHO_DESTINACOES, f"Registrar destinação externa de processo {id_processo}")
-    return novo_id
+def carregar_csv_github(caminho, colunas):
+    try:
+        arquivo = repo.get_contents(caminho, ref=BRANCH)
+        conteudo = arquivo.decoded_content.decode("utf-8")
+        df = pd.read_csv(StringIO(conteudo))
+    except Exception:
+        st.warning(f"⚠️ Não conseguiu ler do GitHub: {caminho}, criando vazio.")
+        df = pd.DataFrame(columns=colunas)
+    return df
 
 # =====================================================
-# BLOQUEIO DE ACESSO
+# CAMINHOS
 # =====================================================
-if "usuario" not in st.session_state:
-    st.error("⛔ Acesso restrito. Faça login.")
-    st.stop()
-
-usuario_logado = st.session_state["usuario"]
-
-df_users = carregar_csv_github(CAMINHO_USUARIOS, ["usuario","perfil"])
-if df_users.empty or usuario_logado not in df_users["usuario"].values:
-    st.warning("⚠️ Usuário não encontrado no CSV de usuários. Acesso limitado.")
-    perfil_usuario = "Protocolo"
-else:
-    perfil_usuario = df_users.loc[df_users["usuario"] == usuario_logado, "perfil"].values[0]
-
-if perfil_usuario not in ["Administrador", "Secretario", "Protocolo"]:
-    st.error("⛔ Acesso permitido apenas a Administrador, Secretário ou Protocolo.")
-    st.stop()
+CAMINHO_PROC = "data/processos.csv"
+CAMINHO_DESTINACOES = "data/destinacoes.csv"
+CAMINHO_SETOR_DESTINO = "data/setores_destinos.csv"
 
 # =====================================================
 # CARREGAR DADOS
@@ -102,7 +82,7 @@ df_proc = carregar_csv_github(CAMINHO_PROC, [
 df_dest = carregar_csv_github(CAMINHO_DESTINACOES, [
     "id_destinacao","id_processo","data_saida","protocolista","destino","observacao"
 ])
-df_setores_destino = carregar_csv_github(CAMINHO_SETOR_DESTINO, ["id_setor_destino","setor_destino","ativo"])
+df_setores_destino = carregar_csv_github(CAMINHO_SETOR_DESTINO, ["setor_destino","ativo"])
 
 # =====================================================
 # PROCESSOS JÁ DESTINADOS
@@ -110,8 +90,7 @@ df_setores_destino = carregar_csv_github(CAMINHO_SETOR_DESTINO, ["id_setor_desti
 if not df_dest.empty:
     df_encaminhados = df_proc.merge(
         df_dest[["id_processo","destino","data_saida"]],
-        on="id_processo",
-        how="inner"
+        on="id_processo", how="inner"
     )
     st.markdown("### 📦 Processos já encaminhados externamente")
     st.dataframe(
@@ -128,7 +107,7 @@ if not df_dest.empty:
     )
 
 # =====================================================
-# REMESSA DE ENVIO EM PDF
+# REMESSA EM PDF
 # =====================================================
 st.divider()
 st.markdown("## 📄 Remessa de Envio de Processos")
@@ -136,32 +115,34 @@ st.markdown("## 📄 Remessa de Envio de Processos")
 if df_dest.empty:
     st.info("📭 Não há processos destinados para gerar remessa.")
 else:
-    df_remessa = df_proc.merge(df_dest[["id_processo","destino"]], on="id_processo", how="inner")
+    df_remessa = df_proc.merge(
+        df_dest[["id_processo","destino"]],
+        on="id_processo", how="inner"
+    )
     df_remessa["label"] = df_remessa["numero_protocolo"].astype(str) + " - " + df_remessa["assunto"].astype(str) + " (" + df_remessa["destino"].astype(str) + ")"
     ids_sel = st.multiselect(
-        "Selecione os processos que irão compor a remessa",
+        "Selecione os processos para remessa",
         df_remessa["id_processo"].tolist(),
-        format_func=lambda x: df_remessa.loc[df_remessa["id_processo"] == x, "label"].values[0]
+        format_func=lambda x: df_remessa.loc[df_remessa["id_processo"]==x,"label"].values[0]
     )
     if ids_sel and st.button("📄 Gerar Remessa em PDF"):
         df_sel = df_remessa[df_remessa["id_processo"].isin(ids_sel)]
         processos_pdf = df_sel[["destino","numero_protocolo","numero_referencia","assunto"]].rename(columns={"destino":"setor_destino"}).to_dict("records")
         caminho_pdf = tempfile.gettempdir() + "/remessa_envio_processos.pdf"
         gerar_pdf_remessa_multi_setor(processos_pdf, caminho_pdf)
-        with open(caminho_pdf, "rb") as f:
+        with open(caminho_pdf,"rb") as f:
             st.download_button("⬇️ Baixar Remessa de Envio", f, file_name="remessa_envio_processos.pdf", mime="application/pdf")
 
 # =====================================================
-# DESTINAÇÃO INDIVIDUAL
+# DESTINAÇÃO EXTERNA
 # =====================================================
 st.divider()
 st.markdown("## 📤 Encaminhamento Externo")
 
 ids_ja_destinados = df_dest["id_processo"].unique() if not df_dest.empty else []
-
 df_disponiveis = df_proc[
-    (df_proc["status"] == "Em Trâmite") &
-    (df_proc["setor_atual"] == "Protocolo") &
+    (df_proc["status"]=="Em Trâmite") &
+    (df_proc["setor_atual"]=="Protocolo") &
     (~df_proc["id_processo"].isin(ids_ja_destinados))
 ]
 
@@ -171,41 +152,34 @@ else:
     id_proc_sel = st.selectbox(
         "Selecione o Processo",
         df_disponiveis["id_processo"],
-        format_func=lambda x: f"{df_disponiveis.loc[df_disponiveis['id_processo'] == x,'numero_protocolo'].values[0]} - {df_disponiveis.loc[df_disponiveis['id_processo'] == x,'assunto'].values[0]}"
+        format_func=lambda x: f"{df_disponiveis.loc[df_disponiveis['id_processo']==x,'numero_protocolo'].values[0]} - {df_disponiveis.loc[df_disponiveis['id_processo']==x,'assunto'].values[0]}"
     )
-    proc = df_disponiveis[df_disponiveis["id_processo"] == id_proc_sel].iloc[0]
-    st.markdown(f"**Referência:** {proc['numero_referencia']}  |  **Setor de Origem:** {proc['setor_origem']}")
-    destinos_ativos = df_setores_destino[df_setores_destino["ativo"] == 1]
-    destino_sel = st.selectbox("Selecione o Setor de Destino", destinos_ativos["setor_destino"])
+    destinos_ativos = df_setores_destino[df_setores_destino["ativo"]==1]
+    destino_sel = st.selectbox("Setor de Destino", destinos_ativos["setor_destino"])
     observacao = st.text_area("Observação (opcional)")
     if st.button("📦 Registrar Tramitação"):
-        novo_id = registrar_destinacao(
-            id_processo=id_proc_sel,
-            data_saida=datetime.now().strftime("%d/%m/%Y %H:%M"),
-            protocolista=usuario_logado,
-            destino=destino_sel,
-            observacao=observacao
-        )
-        df_proc.loc[df_proc["id_processo"] == id_proc_sel, ["status","acao"]] = ["Arquivado","Arquivado / Destinado"]
+        novo_id = 1 if df_dest.empty else int(df_dest["id_destinacao"].max()) + 1
+        df_dest.loc[len(df_dest)] = [novo_id, id_proc_sel, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), usuario_logado, destino_sel, observacao]
+        salvar_csv_github(df_dest, CAMINHO_DESTINACOES, f"Registrar destinação externa do processo {id_proc_sel}")
+        df_proc.loc[df_proc["id_processo"]==id_proc_sel, ["status","acao"]] = ["Arquivado","Arquivado / Destinado"]
         salvar_csv_github(df_proc, CAMINHO_PROC, f"Arquivar e destinar processo {id_proc_sel}")
         st.success(f"✅ Processo arquivado e encaminhado ({novo_id})")
 
 # =====================================================
-# DESARQUIVAMENTO DE PROCESSOS
+# DESARQUIVAMENTO
 # =====================================================
 st.divider()
 st.markdown("## ♻️ Desarquivar Processo")
-
-df_arquivados = df_proc[df_proc["status"] == "Arquivado"]
-
+df_arquivados = df_proc[df_proc["status"]=="Arquivado"]
 if df_arquivados.empty:
     st.info("📂 Não há processos arquivados disponíveis para desarquivamento.")
 else:
-    df_arquivados["label"] = df_arquivados["numero_protocolo"].astype(str) + " - " + df_arquivados["assunto"].astype(str)
+    df_arquivados["label"] = df_arquivados["numero_protocolo"] + " - " + df_arquivados["assunto"]
     mapa_proc = dict(zip(df_arquivados["label"], df_arquivados["id_processo"]))
     proc_label = st.selectbox("Selecione o processo arquivado", options=mapa_proc.keys(), key="desarquivar_proc")
+    id_proc_des = mapa_proc[proc_label]
     observacao_des = st.text_area("Observação do desarquivamento", value="Processo desarquivado para retomada da tramitação.")
     if st.button("♻️ Desarquivar Processo"):
-        df_proc.loc[df_proc["id_processo"] == proc_label, ["status","acao"]] = ["Em Trâmite","Desarquivado"]
-        salvar_csv_github(df_proc, CAMINHO_PROC, f"Desarquivar processo {proc_label}")
+        df_proc.loc[df_proc["id_processo"]==id_proc_des, ["status","acao"]] = ["Em Trâmite","Desarquivado"]
+        salvar_csv_github(df_proc, CAMINHO_PROC, f"Desarquivar processo {id_proc_des}")
         st.success("✅ Processo desarquivado com sucesso e liberado para tramitação.")
