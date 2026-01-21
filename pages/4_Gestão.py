@@ -59,17 +59,17 @@ CAMINHO_PROC = "data/processos.csv"
 CAMINHO_AND = "data/andamentos.csv"
 CAMINHO_USERS = "data/usuarios.csv"
 
-df_proc = carregar_csv_github(CAMINHO_PROC, columns=[
+df_proc = carregar_csv_github(CAMINHO_PROC, colunas=[
     "id_processo","numero_protocolo","data_entrada","numero_referencia",
     "setor_origem","assunto","descricao","setor_atual","status","id_setor_atual","acao"
 ])
 
-df_and = carregar_csv_github(CAMINHO_AND, columns=[
+df_and = carregar_csv_github(CAMINHO_AND, colunas=[
     "id_andamento","id_processo","data","servidor","perfil","acao",
     "observacao","setor_origem","setor_destino"
 ])
 
-df_users = carregar_csv_github(CAMINHO_USERS, columns=[
+df_users = carregar_csv_github(CAMINHO_USERS, colunas=[
     "usuario","senha","perfil","setor","nome_completo"
 ])
 
