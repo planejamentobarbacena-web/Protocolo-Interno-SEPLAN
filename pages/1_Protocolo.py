@@ -2,10 +2,16 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
+from github import Github
 
+# =====================================================
+# CONFIGURAÇÃO DA PÁGINA
+# =====================================================
 st.set_page_config(page_title="Registro de Protocolo", layout="wide")
 
-# 🔐 Verificação de login
+# =====================================================
+# BLOQUEIO DE ACESSO
+# =====================================================
 if "usuario" not in st.session_state:
     st.warning("Acesso restrito. Faça login.")
     st.stop()
@@ -17,6 +23,38 @@ setor_logado = st.session_state.get("setor", "Protocolo")
 st.title("📄 Registro de Protocolo")
 st.markdown("Preencha os dados do documento recebido para iniciar o processo.")
 
+# =====================================================
+# GITHUB CONFIG
+# =====================================================
+GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
+REPO_NAME = st.secrets["REPO_NAME"]
+BRANCH = "main"
+
+g = Github(GITHUB_TOKEN)
+repo = g.get_repo(REPO_NAME)
+
+def salvar_csv_github(df, caminho, mensagem):
+    csv_bytes = df.to_csv(index=False).encode("utf-8")
+    try:
+        arquivo = repo.get_contents(caminho, ref=BRANCH)
+        repo.update_file(
+            path=arquivo.path,
+            message=mensagem,
+            content=csv_bytes,
+            sha=arquivo.sha,
+            branch=BRANCH
+        )
+    except:
+        repo.create_file(
+            path=caminho,
+            message=mensagem,
+            content=csv_bytes,
+            branch=BRANCH
+        )
+
+# =====================================================
+# CAMINHOS
+# =====================================================
 CAMINHO_PROC = "data/processos.csv"
 CAMINHO_AND = "data/andamentos.csv"
 
@@ -44,10 +82,13 @@ if registrar:
 
     ano_atual = datetime.now().year
 
-    # 📂 PROCESSOS
-    if os.path.exists(CAMINHO_PROC):
-        df_proc = pd.read_csv(CAMINHO_PROC)
-    else:
+    # =====================================================
+    # PROCESSOS
+    # =====================================================
+    try:
+        arquivo_proc = repo.get_contents(CAMINHO_PROC, ref=BRANCH)
+        df_proc = pd.read_csv(pd.compat.StringIO(arquivo_proc.decoded_content.decode("utf-8")))
+    except:
         df_proc = pd.DataFrame(columns=[
             "id_processo",
             "numero_protocolo",
@@ -57,7 +98,8 @@ if registrar:
             "assunto",
             "descricao",
             "setor_atual",
-            "status"
+            "status",
+            "id_setor_atual"
         ])
 
     novo_id = 1 if df_proc.empty else int(df_proc["id_processo"].max()) + 1
@@ -81,57 +123,67 @@ if registrar:
     novo_processo = {
         "id_processo": novo_id,
         "numero_protocolo": numero_protocolo,
-        "data_entrada": datetime.now(),
+        "data_entrada": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "numero_referencia": numero_referencia,
         "setor_origem": setor_origem,
         "assunto": assunto,
         "descricao": descricao,
         "setor_atual": "Protocolo",
-        "status": "Em Trâmite"
+        "status": "Em Trâmite",
+        "id_setor_atual": 1
     }
 
     df_proc = pd.concat([df_proc, pd.DataFrame([novo_processo])], ignore_index=True)
-    df_proc.to_csv(CAMINHO_PROC, index=False)
+
+    salvar_csv_github(
+        df_proc,
+        CAMINHO_PROC,
+        f"Novo protocolo {numero_protocolo}"
+    )
 
     # =====================================================
     # ANDAMENTOS
     # =====================================================
-    if os.path.exists(CAMINHO_AND):
-        df_and = pd.read_csv(CAMINHO_AND)
-    else:
+    try:
+        arquivo_and = repo.get_contents(CAMINHO_AND, ref=BRANCH)
+        df_and = pd.read_csv(pd.compat.StringIO(arquivo_and.decoded_content.decode("utf-8")))
+    except:
         df_and = pd.DataFrame(columns=[
-    "id_andamento",
-    "id_processo",
-    "data",
-    "servidor",
-    "perfil",
-    "acao",
-    "observacao",
-    "setor_origem",
-    "setor_destino"
-])
+            "id_andamento",
+            "id_processo",
+            "data",
+            "servidor",
+            "perfil",
+            "acao",
+            "observacao",
+            "setor_origem",
+            "setor_destino"
+        ])
 
-    novo_id_andamento = 1 if df_and.empty else int(df_and["id_andamento"].max()) + 1
+    novo_and_id = 1 if df_and.empty else int(df_and["id_andamento"].max()) + 1
 
     novo_andamento = {
-    "id_andamento": novo_id_andamento,
-    "id_processo": novo_id,
-    "data": datetime.now(),
-    "servidor": usuario_logado,
-    "perfil": perfil_logado,
-    "acao": "Protocolo Inicial",
-    "observacao": descricao,
-    "setor_origem": setor_origem if setor_origem else "Externo",
-    "setor_destino": "Protocolo"
-}
-
+        "id_andamento": novo_and_id,
+        "id_processo": novo_id,
+        "data": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "servidor": usuario_logado,
+        "perfil": perfil_logado,
+        "acao": "Protocolo Inicial",
+        "observacao": descricao,
+        "setor_origem": setor_origem if setor_origem else "Externo",
+        "setor_destino": setor_logado
+    }
 
     df_and = pd.concat([df_and, pd.DataFrame([novo_andamento])], ignore_index=True)
-    df_and.to_csv(CAMINHO_AND, index=False)
+
+    salvar_csv_github(
+        df_and,
+        CAMINHO_AND,
+        f"Andamento inicial do processo {numero_protocolo}"
+    )
 
     # =====================================================
     # FEEDBACK
     # =====================================================
     st.success(f"✅ Protocolo nº {numero_protocolo} criado com sucesso!")
     st.info("O processo já está disponível para tramitação.")
-
