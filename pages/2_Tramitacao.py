@@ -84,11 +84,19 @@ except:
 # =========================================================
 # AJUSTE DE FUSO HORÁRIO PARA BRASÍLIA
 # =========================================================
+# Converte strings para datetime
 df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce")
+
+# Preenche valores vazios com o horário atual de SP
+df_and["data"] = df_and["data"].fillna(pd.Timestamp.now(tz="America/Sao_Paulo"))
+
+# Ajusta fuso horário para Brasília
+# Se a coluna já for tz-aware, converte; se tz-naive, localiza
 if df_and["data"].dt.tz is not None:
     df_and["data"] = df_and["data"].dt.tz_convert("America/Sao_Paulo")
 else:
-    df_and["data"] = df_and["data"].dt.tz_localize("UTC").dt.tz_convert("America/Sao_Paulo")
+    df_and["data"] = df_and["data"].dt.tz_localize("America/Sao_Paulo")
+
 
 # =========================================================
 # PROCESSOS NO SETOR DO USUÁRIO
@@ -204,3 +212,4 @@ if st.button("📤 Registrar andamento"):
     salvar_csv_github(df_proc, CAMINHO_PROC, f"Atualização do processo {id_processo}")
 
     st.success(f"✅ Andamento registrado e enviado para {setor_destino}")
+
