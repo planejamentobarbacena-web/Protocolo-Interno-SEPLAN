@@ -19,6 +19,7 @@ st.set_page_config(
 # CAMINHOS
 # =====================================================
 CAMINHO_PROC = "data/processos.csv"
+CAMINHO_AND = "data/andamentos.csv"
 CAMINHO_DESTINACOES = "data/destinacoes.csv"
 CAMINHO_SETOR_DESTINO = "data/setores_destinos.csv"
 CAMINHO_USUARIOS = "data/usuarios.csv"
@@ -135,6 +136,26 @@ except:
 df_setores_destino = carregar_csv(CAMINHO_SETOR_DESTINO)
 
 # =====================================================
+# ATUALIZAR SETOR_ATUAL A PARTIR DOS ANDAMENTOS
+# =====================================================
+try:
+    arquivo_and = repo.get_contents(CAMINHO_AND, ref=BRANCH)
+    df_and = pd.read_csv(pd.compat.StringIO(arquivo_and.decoded_content.decode("utf-8")))
+    df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce")
+
+    ultimos_andamentos = (
+        df_and.sort_values("data")
+        .groupby("id_processo")
+        .tail(1)
+    )
+
+    df_proc["setor_atual"] = df_proc["id_processo"].map(
+        ultimos_andamentos.set_index("id_processo")["setor_destino"]
+    )
+except:
+    pass
+
+# =====================================================
 # PROCESSOS JÁ ENCAMINHADOS
 # =====================================================
 if not df_dest.empty:
@@ -226,6 +247,7 @@ st.markdown("## 📤 Encaminhamento Externo")
 
 ids_ja_destinados = df_dest["id_processo"].unique() if not df_dest.empty else []
 
+# 🔹 FILTRO: status Em Trâmite e setor atual Protocolo
 df_disponiveis = df_proc[
     (df_proc["status"] == "Em Trâmite") &
     (df_proc["setor_atual"] == "Protocolo") &
@@ -304,8 +326,6 @@ else:
         options=mapa_proc.keys(),
         key="desarquivar_proc"
     )
-
-    id_proc_des = mapa_proc[proc_label]
 
     observacao_des = st.text_area(
         "Observação do desarquivamento",
