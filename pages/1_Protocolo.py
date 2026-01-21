@@ -1,8 +1,19 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
 from io import StringIO
 from github import Github
+from datetime import datetime
+import pytz  # <- import necessário para fuso horário
+
+# =====================================================
+# FUNÇÃO DE HORÁRIO BRASÍLIA
+# =====================================================
+def agora_brasilia():
+    """
+    Retorna a data e hora atuais no fuso de Brasília (UTC-3)
+    """
+    fuso = pytz.timezone("America/Sao_Paulo")
+    return datetime.now(fuso)
 
 # =====================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -80,7 +91,7 @@ with st.form("form_protocolo"):
 # =====================================================
 if registrar:
 
-    ano_atual = datetime.now().year
+    ano_atual = agora_brasilia().year  # <- usa hora de Brasília
 
     # =====================================================
     # PROCESSOS
@@ -125,7 +136,7 @@ if registrar:
     novo_processo = {
         "id_processo": novo_id,
         "numero_protocolo": numero_protocolo,
-        "data_entrada": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "data_entrada": agora_brasilia().strftime("%Y-%m-%d %H:%M:%S"),  # <- horário Brasília
         "numero_referencia": numero_referencia,
         "setor_origem": setor_origem,
         "assunto": assunto,
@@ -169,7 +180,7 @@ if registrar:
     novo_andamento = {
         "id_andamento": novo_and_id,
         "id_processo": novo_id,
-        "data": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "data": agora_brasilia().strftime("%Y-%m-%d %H:%M:%S"),  # <- horário Brasília
         "servidor": usuario_logado,
         "perfil": perfil_logado,
         "acao": "Protocolo Inicial",
