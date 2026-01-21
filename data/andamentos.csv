@@ -10,4 +10,5 @@ id_andamento,id_processo,data,servidor,perfil,acao,observacao,setor_origem,setor
 9,1,2026-01-21 13:06:49-03:00,admin,Administrador,Análise,oooo,Protocolo,Protocolo
 10,4,2026-01-21 12:05:18-03:00,secretario,Secretario,Protocolo Inicial,olha a hora,brasilia,Secretaria
 11,4,2026-01-21 15:05:45-03:00,secretario,Secretario,Encaminhamento,seguimento do horario,Secretaria,Modernização Administrativa
-12,4,2026-01-21 15:10:21,julio,Administrador,Análise,horario,Modernização Administrativa,Protocolo
+12,4,,julio,Administrador,Análise,horario,Modernização Administrativa,Protocolo
+13,1,2026-01-21 18:16:02,admin,Administrador,Análise,horariao,Protocolo,Secretaria
