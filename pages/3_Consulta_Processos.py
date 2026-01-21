@@ -27,7 +27,20 @@ df_dest = pd.read_csv(CAMINHO_DESTINACOES) if os.path.exists(CAMINHO_DESTINACOES
 
 df_proc["id_processo"] = pd.to_numeric(df_proc["id_processo"], errors="coerce")
 df_and["id_processo"] = pd.to_numeric(df_and["id_processo"], errors="coerce")
+
+# =====================================================
+# AJUSTE DE HORÁRIO PARA BRASÍLIA
+# =====================================================
 df_and["data"] = pd.to_datetime(df_and["data"], errors="coerce")
+
+# Preenche valores ausentes com horário atual de Brasília
+df_and["data"] = df_and["data"].fillna(pd.Timestamp.now(tz="America/Sao_Paulo"))
+
+# Se tz-naive, localiza; se já tz-aware, converte
+if df_and["data"].dt.tz is not None:
+    df_and["data"] = df_and["data"].dt.tz_convert("America/Sao_Paulo")
+else:
+    df_and["data"] = df_and["data"].dt.tz_localize("America/Sao_Paulo")
 
 df_proc = df_proc.dropna(subset=["id_processo"])
 
@@ -83,7 +96,8 @@ hist = (
 if hist.empty:
     st.info("Nenhum andamento interno registrado.")
 else:
-    hist["Data/Hora"] = hist["data"].dt.strftime("%d/%m/%Y %H:%M")
+    # Ajuste de exibição com fuso horário
+    hist["Data/Hora"] = hist["data"].dt.tz_convert("America/Sao_Paulo").dt.strftime("%d/%m/%Y %H:%M")
     hist["Referência"] = proc["numero_referencia"]
     hist["Assunto"] = proc["assunto"]
 
@@ -126,7 +140,7 @@ if dest.empty:
 else:
     dest["Data/Hora"] = pd.to_datetime(
         dest["data_saida"], errors="coerce", dayfirst=True
-    ).dt.strftime("%d/%m/%Y %H:%M")
+    ).dt.tz_localize("America/Sao_Paulo", ambiguous='NaT').dt.strftime("%d/%m/%Y %H:%M")
 
     dest_exibir = dest[[
         "Data/Hora",
@@ -171,4 +185,3 @@ if st.button("Gerar PDF"):
             file_name=nome,
             mime="application/pdf"
         )
-
