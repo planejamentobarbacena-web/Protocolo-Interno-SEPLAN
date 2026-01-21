@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-import os
+from io import StringIO
 from github import Github
 
 # =====================================================
@@ -87,8 +87,10 @@ if registrar:
     # =====================================================
     try:
         arquivo_proc = repo.get_contents(CAMINHO_PROC, ref=BRANCH)
-        df_proc = pd.read_csv(pd.compat.StringIO(arquivo_proc.decoded_content.decode("utf-8")))
-    except:
+        conteudo = arquivo_proc.decoded_content.decode("utf-8")
+        df_proc = pd.read_csv(StringIO(conteudo))
+    except Exception as e:
+        st.warning(f"processos.csv não encontrado, criando novo. Detalhe: {e}")
         df_proc = pd.DataFrame(columns=[
             "id_processo",
             "numero_protocolo",
@@ -146,8 +148,10 @@ if registrar:
     # =====================================================
     try:
         arquivo_and = repo.get_contents(CAMINHO_AND, ref=BRANCH)
-        df_and = pd.read_csv(pd.compat.StringIO(arquivo_and.decoded_content.decode("utf-8")))
-    except:
+        conteudo_and = arquivo_and.decoded_content.decode("utf-8")
+        df_and = pd.read_csv(StringIO(conteudo_and))
+    except Exception as e:
+        st.warning(f"andamentos.csv não encontrado, criando novo. Detalhe: {e}")
         df_and = pd.DataFrame(columns=[
             "id_andamento",
             "id_processo",
