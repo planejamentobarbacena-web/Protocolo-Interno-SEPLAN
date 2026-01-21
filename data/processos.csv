@@ -3,4 +3,4 @@ id_processo,numero_protocolo,data_entrada,numero_referencia,setor_origem,assunto
 2,002/2026,2026-01-21 14:36:34,testando numeraçoa,01,para 01,vamos,Protocolo,Arquivado,1,Arquivado / Destinado
 3,003/2026,2026-01-21 14:36:53,testando numeração,02,para 02,esse,Modernização Administrativa,Em Trâmite,5,Análise
 4,004/2026,2026-01-21 15:05:16,Testando mais um,brasilia,horario,olha a hora,Protocolo,Em Trâmite,1,Análise
-5,005/2026,2026-01-21 15:22:17,novo,hora,relogio,teste,Protocolo,Em Trâmite,1,
+5,005/2026,2026-01-21 15:22:17,novo,hora,relogio,teste,Modernização Administrativa,Em Trâmite,5,Conclusão
