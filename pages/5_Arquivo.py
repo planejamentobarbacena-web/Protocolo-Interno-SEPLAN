@@ -240,3 +240,54 @@ else:
         commit_git("Arquivar e destinar processo externo")
 
         st.success(f"✅ Processo arquivado e encaminhado ({novo_id})")
+
+# =====================================================
+# 🔓 DESARQUIVAMENTO DE PROCESSOS
+# =====================================================
+st.divider()
+st.markdown("## ♻️ Desarquivar Processo")
+
+df_arquivados = df_proc[df_proc["status"] == "Arquivado"]
+
+if df_arquivados.empty:
+    st.info("📂 Não há processos arquivados disponíveis para desarquivamento.")
+else:
+    df_arquivados = df_arquivados.copy()
+
+    df_arquivados["label"] = (
+        df_arquivados["numero_protocolo"].astype(str)
+        + " - "
+        + df_arquivados["assunto"].astype(str)
+    )
+
+    mapa_proc = dict(zip(
+        df_arquivados["label"],
+        df_arquivados["id_processo"]
+    ))
+
+    proc_label = st.selectbox(
+        "Selecione o processo arquivado",
+        options=mapa_proc.keys(),
+        key="desarquivar_proc"
+    )
+
+    id_proc_des = mapa_proc[proc_label]
+
+    observacao_des = st.text_area(
+        "Observação do desarquivamento",
+        value="Processo desarquivado para retomada da tramitação."
+    )
+
+    if st.button("♻️ Desarquivar Processo"):
+        df_proc.loc[
+            df_proc["id_processo"] == id_proc_des,
+            ["status", "acao"]
+        ] = ["Em Trâmite", "Desarquivado"]
+
+        df_proc.to_csv(CAMINHO_PROC, index=False)
+        commit_git("Desarquivar processo para nova tramitação")
+
+        st.success(
+            "✅ Processo desarquivado com sucesso e liberado para tramitação."
+        )
+
